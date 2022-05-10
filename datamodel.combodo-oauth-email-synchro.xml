@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itop_design
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.6">
+  <constants>
+  </constants>
+  <classes>
+    <class id="MailInboxOAuth" _delta="define">
+      <php_parent>
+        <name>MailInboxStandard</name>
+      </php_parent>
+      <parent>cmdbAbstractObject</parent>
+      <properties>
+        <comment></comment>
+        <category>searchable,view_in_gui,bizmodel</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>mailinbox_oauth</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field>realclass</db_final_class_field>
+        <naming>
+          <format>%1$s</format>
+          <attributes>
+            <attribute id="login" />
+          </attributes>
+        </naming>
+        <display_template />
+        <icon></icon>
+        <reconciliation>
+          <attributes>
+            <attribute id="server" />
+            <attribute id="login" />
+            <attribute id="protocol" />
+            <attribute id="mailbox" />
+            <attribute id="port" />
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="oauth_provider" xsi:type="AttributeText">
+          <sql>oauth_provider</sql>
+          <default_value />
+          <is_null_allowed>true</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="oauth_client_id" xsi:type="AttributeText">
+          <sql>oauth_client_id</sql>
+          <default_value />
+          <is_null_allowed>true</is_null_allowed>
+          <dependencies>
+            <attribute id="protocol" />
+          </dependencies>
+        </field>
+        <field id="oauth_client_secret" xsi:type="AttributeText">
+          <sql>oauth_client_secret</sql>
+          <default_value />
+          <is_null_allowed>true</is_null_allowed>
+          <dependencies>
+            <attribute id="protocol" />
+          </dependencies>
+        </field>
+        <field id="oauth_access_token" xsi:type="AttributeText">
+          <sql>oauth_token</sql>
+          <default_value />
+          <is_null_allowed>true</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+        <field id="oauth_refresh_token" xsi:type="AttributeText">
+          <sql>oauth_refresh_token</sql>
+          <default_value />
+          <is_null_allowed>true</is_null_allowed>
+          <tracking_level>none</tracking_level>
+        </field>
+      </fields>
+      <presentation>
+        <details>
+          <items>
+            <item id="col:col0">
+              <rank>10</rank>
+              <items>
+                <item id="fieldset:MailInbox:Server">
+                  <rank>10</rank>
+                  <items>
+                    <item id="server">
+                      <rank>10</rank>
+                    </item>
+                    <item id="login">
+                      <rank>20</rank>
+                    </item>
+                    <item id="protocol">
+                      <rank>20</rank>
+                    </item>
+                    <item id="port">
+                      <rank>20</rank>
+                    </item>
+                    <item id="oauth_provider">
+                      <rank>30</rank>
+                    </item>
+                    <item id="oauth_client_id">
+                      <rank>40</rank>
+                    </item>
+                    <item id="oauth_client_secret">
+                      <rank>50</rank>
+                    </item>
+                    <item id="oauth_access_token">
+                      <rank>60</rank>
+                    </item>
+                    <item id="oauth_refresh_token">
+                      <rank>60</rank>
+                    </item>
+                    <item id="mailbox">
+                      <rank>70</rank>
+                    </item>
+                    <item id="active">
+                      <rank>80</rank>
+                    </item>
+                    <item id="trace">
+                      <rank>90</rank>
+                    </item>
+                  </items>
+                </item>
+                <item id="fieldset:MailInbox:Errors">
+                  <rank>20</rank>
+                  <items>
+                    <item id="error_behavior">
+                      <rank>10</rank>
+                    </item>
+                    <item id="notify_errors_to">
+                      <rank>20</rank>
+                    </item>
+                    <item id="notify_errors_from">
+                      <rank>30</rank>
+                    </item>
+                  </items>
+                </item>
+              </items>
+            </item>
+            <item id="col:col1">
+              <rank>20</rank>
+              <items>
+                <item id="fieldset:MailInbox:Behavior">
+                  <rank>10</rank>
+                  <items>
+                    <item id="behavior">
+                      <rank>10</rank>
+                    </item>
+                    <item id="email_storage">
+                      <rank>20</rank>
+                    </item>
+                    <item id="target_class">
+                      <rank>30</rank>
+                    </item>
+                    <item id="ticket_default_values">
+                      <rank>40</rank>
+                    </item>
+                    <item id="ticket_default_title">
+                      <rank>50</rank>
+                    </item>
+                    <item id="title_pattern">
+                      <rank>60</rank>
+                    </item>
+                    <item id="stimuli">
+                      <rank>70</rank>
+                    </item>
+                  </items>
+                </item>
+                <item id="fieldset:MailInbox:Caller">
+                  <rank>20</rank>
+                  <items>
+                    <item id="unknown_caller_behavior">
+                      <rank>10</rank>
+                    </item>
+                    <item id="unknown_caller_rejection_reply">
+                      <rank>15</rank>
+                    </item>
+                    <item id="caller_default_values">
+                      <rank>20</rank>
+                    </item>
+                  </items>
+                </item>
+                <item id="fieldset:MailInbox:OtherContacts">
+                  <rank>30</rank>
+                  <items>
+                    <item id="import_additional_contacts">
+                      <rank>10</rank>
+                    </item>
+                  </items>
+                </item>
+              </items>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="server">
+              <rank>10</rank>
+            </item>
+            <item id="login">
+              <rank>20</rank>
+            </item>
+            <item id="mailbox">
+              <rank>30</rank>
+            </item>
+            <item id="protocol">
+              <rank>40</rank>
+            </item>
+            <item id="active">
+              <rank>50</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="server">
+              <rank>10</rank>
+            </item>
+            <item id="mailbox">
+              <rank>20</rank>
+            </item>
+            <item id="protocol">
+              <rank>30</rank>
+            </item>
+            <item id="active">
+              <rank>40</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+      <methods>
+        <method id="GetEmailSource">
+          <comment>/**
+            * Get an EmailSource instance initialized according to the MailInbox configuration
+            * @throws Exception
+            * @return EmailSource The initialized EmailSource or an exception if the conneciton fails
+            */</comment>
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[	public function GetEmailSource()
+	{
+		$sProtocol = $this->Get('protocol');
+		$sServer = $this->Get('server');
+		$sPwd = $this->Get('password');
+		$sLogin = $this->Get('login');
+		$sMailbox = $this->Get('mailbox');
+		$iPort = $this->Get('port');
+	
+		// Always IMAP with oAuth
+		$aImapOptions = MetaModel::GetModuleSetting('combodo-email-synchro', 'imap_options', array('imap'));
+		if($sProtocol === 'imap'){
+		  $oSource = new Combodo\iTop\Extension\Service\IMAPOAuthEmailSource($this);
+		}
+		else{
+			$oSource = new Combodo\iTop\Extension\Service\POP3OAuthEmailSource($this);
+		}
+		return $oSource;
+	}]]></code>
+        </method>
+      </methods>
+    </class>
+  </classes>
+  <menus>
+  </menus>
+  <user_rights>
+    <groups>
+    </groups>
+    <profiles>
+    </profiles>
+  </user_rights>
+</itop_design>
