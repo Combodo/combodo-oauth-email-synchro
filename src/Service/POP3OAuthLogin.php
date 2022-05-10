@@ -1,26 +1,28 @@
 <?php
-//namespace Combodo\iTop\Extension\OAuthEmailSynchroService\Service;
+
 namespace Combodo\iTop\Extension\Service;
 
 use Combodo\iTop\Core\Authentication\Client\OAuth\OAuthClientProviderAbstract as OAuthClientProviderAbstractAlias;
+use IssueLog;
+use Laminas\Mail\Protocol\Exception\RuntimeException;
+use Laminas\Mail\Protocol\Pop3;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 
-class POP3OAuthLogin extends \Laminas\Mail\Protocol\Pop3 {
+class POP3OAuthLogin extends Pop3
+{
+	const LOG_CHANNEL = 'OAuth';
 
 	/**
 	 * Public constructor
 	 *
-	 * @param  string       $host           hostname or IP address of IMAP server, if given connect() is called
-	 * @param  int|null     $port           port of IMAP server, null for default (143 or 993 for ssl)
-	 * @param  string|bool  $ssl            use ssl? 'SSL', 'TLS' or false
-	 * @param  bool         $novalidatecert set to true to skip SSL certificate validation
-	 * @throws \Laminas\Mail\Protocol\Exception\ExceptionInterface
+	 * @param $oProvider
 	 */
 	public function __construct($oProvider)
 	{
 		parent::__construct();
 		$this->setProvider($oProvider);
 	}
+
 	/**
 	 * LOGIN username
 	 *
@@ -33,44 +35,53 @@ class POP3OAuthLogin extends \Laminas\Mail\Protocol\Pop3 {
 		try {
 			if (empty($this->oProvider->GetAccessToken())) {
 				throw new IdentityProviderException('Not prior authentication to OAuth', 255, []);
-			}
-			else {
+			} else {
 				$this->oProvider->SetAccessToken($this->oProvider->GetVendorProvider()->getAccessToken('refresh_token', [
-					'refresh_token' => $this->oProvider->GetAccessToken()->getRefreshToken()
+					'refresh_token' => $this->oProvider->GetAccessToken()->getRefreshToken(),
 				]));
 			}
 		}
 		catch (IdentityProviderException $e) {
-			\IssueLog::Error('Failed to get oAuth credentials for incoming mails');
+			IssueLog::Error('Failed to get oAuth credentials for POP3 for provider '.$this->oProvider::GetVendorName(), static::LOG_CHANNEL);
+
 			return false;
 		}
 		$sAccessToken = $this->oProvider->GetAccessToken()->getToken();
 
 		if (empty($sAccessToken)) {
+			IssueLog::Error('No OAuth token for POP3 for provider '.$this->oProvider::GetVendorName(), static::LOG_CHANNEL);
+
 			return false;
 		}
-		$response = $this->request(
-			'AUTH XOAUTH2 '.base64_encode("user={$user}\1auth=Bearer {$sAccessToken}\1\1")
+		$sResponse = $this->request(
+			'AUTH XOAUTH2 '.base64_encode("user=$user\1auth=Bearer $sAccessToken\1\1")
 		);
+		IssueLog::Debug("POP3 Oauth sending AUTH XOAUTH2 user=$user auth=Bearer $sAccessToken", static::LOG_CHANNEL);
 
-		while (true) {
-			$isPlus = $response === '+';
-			if ($isPlus) {
-				// Send empty client response.
-				$this->request('');
-			} else {
-				if (
-					preg_match('/^NO/i', $response) ||
-					preg_match('/^BAD/i', $response)) {
-					return false;
+		try {
+			while (true) {
+				if ($sResponse === '+') {
+					// Send empty client response.
+					$this->request('');
+				} else {
+					if (preg_match('/^NO/i', $sResponse) ||
+						preg_match('/^BAD/i', $sResponse)) {
+						IssueLog::Error('Unable to authenticate for POP3 for provider '.$this->oProvider::GetVendorName()." Error: $sResponse", static::LOG_CHANNEL);
+
+						return false;
+					}
+					if (preg_match("/Welcome/i", $sResponse)) {
+						return true;
+					}
 				}
-				if (preg_match("/Welcome/i", $response)){
-					$this->auth = true;
-					return true;
-				}
+				$sResponse = $this->readResponse();
 			}
-			$response = $this->readResponse();
 		}
+		catch (RuntimeException $e) {
+			IssueLog::Error('Timeout connection for POP3 for provider '.$this->oProvider::GetVendorName(), static::LOG_CHANNEL);
+		}
+
+
 		return false;
 	}
 

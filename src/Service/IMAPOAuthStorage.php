@@ -1,4 +1,5 @@
 <?php
+
 namespace Combodo\iTop\Extension\Service;
 
 
@@ -6,35 +7,40 @@ use IssueLog;
 use Laminas\Mail\Storage\Exception\ExceptionInterface;
 use Laminas\Mail\Storage\Exception\InvalidArgumentException;
 use Laminas\Mail\Storage\Exception\RuntimeException;
+use Laminas\Mail\Storage\Imap;
 
-class IMAPOAuthStorage extends \Laminas\Mail\Storage\Imap{
-	
-	public function __construct($params){
-		IssueLog::Info('Debut creation Storage');
+class IMAPOAuthStorage extends Imap
+{
+	const LOG_CHANNEL = 'OAuth';
+
+	public function __construct($params)
+	{
 		if (is_array($params)) {
-			$params = (object) $params;
+			$params = (object)$params;
 		}
 
 		$this->has['flags'] = true;
-		
+
 		if ($params instanceof IMAPOAuthLogin) {
 			$this->protocol = $params;
 			try {
 				$this->selectFolder('INBOX');
-			} catch ( ExceptionInterface $e) {
+			}
+			catch (ExceptionInterface $e) {
 				throw new  RuntimeException('cannot select INBOX, is this a valid transport?', 0, $e);
 			}
+
 			return;
 		}
 
-		if (! isset($params->user)) {
+		if (!isset($params->user)) {
 			throw new  InvalidArgumentException('need at least user in params');
 		}
 
-		$host     = isset($params->host) ? $params->host : 'localhost';
+		$host = isset($params->host) ? $params->host : 'localhost';
 		$password = isset($params->password) ? $params->password : '';
-		$port     = isset($params->port) ? $params->port : null;
-		$ssl      = isset($params->ssl) ? $params->ssl : false;
+		$port = isset($params->port) ? $params->port : null;
+		$ssl = isset($params->ssl) ? $params->ssl : false;
 
 		$this->protocol = new IMAPOAuthLogin($params->provider);
 
@@ -43,11 +49,11 @@ class IMAPOAuthStorage extends \Laminas\Mail\Storage\Imap{
 		}
 
 		$this->protocol->connect($host, $port, $ssl);
-		if (! $this->protocol->login($params->user, $password)) {
+		if (!$this->protocol->login($params->user, $password)) {
+			IssueLog::Error("Cannot login to IMAP OAuth for mailbox $host", static::LOG_CHANNEL);
 			throw new  RuntimeException('cannot login, user or tokens');
 		}
 		$this->selectFolder(isset($params->folder) ? $params->folder : 'INBOX');
-		IssueLog::Info('Fin creation Storage');
 	}
 
 	public function logout()

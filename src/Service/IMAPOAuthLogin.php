@@ -4,9 +4,13 @@ namespace Combodo\iTop\Extension\Service;
 
 use Combodo\iTop\Core\Authentication\Client\OAuth\OAuthClientProviderAbstract as OAuthClientProviderAbstractAlias;
 use IssueLog;
+use Laminas\Mail\Protocol\Exception\RuntimeException;
+use Laminas\Mail\Protocol\Imap;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 
-class IMAPOAuthLogin extends \Laminas\Mail\Protocol\Imap{
+class IMAPOAuthLogin extends Imap
+{
+	const LOG_CHANNEL = 'OAuth';
 
 	/**
 	 * Public constructor
@@ -18,6 +22,7 @@ class IMAPOAuthLogin extends \Laminas\Mail\Protocol\Imap{
 		parent::__construct();
 		$this->setProvider($oProvider);
 	}
+
 	/**
 	 * LOGIN username
 	 *
@@ -27,58 +32,69 @@ class IMAPOAuthLogin extends \Laminas\Mail\Protocol\Imap{
 
 	public function login($user, $password)
 	{
-		try {
-			IssueLog::Info('Début login');
-
-			if (empty($this->oProvider->GetAccessToken())) {
+		try
+		{
+			if (empty($this->oProvider->GetAccessToken()))
+			{
 				throw new IdentityProviderException('Not prior authentication to OAuth', 255, []);
 			}
-			else {
-				$this->oProvider->SetAccessToken($this->oProvider->GetVendorProvider()->getAccessToken('refresh_token', [
-					'refresh_token' => $this->oProvider->GetAccessToken()->getRefreshToken(),
-					'scope' => $this->oProvider->GetScope()
-				]));
+			else
+			{
+				$this->oProvider->SetAccessToken($this->oProvider->GetVendorProvider()->getAccessToken('refresh_token',
+					[
+						'refresh_token' => $this->oProvider->GetAccessToken()->getRefreshToken(),
+						'scope' => $this->oProvider->GetScope()
+					]));
 			}
-		}
-		catch (IdentityProviderException $e) {
-			\IssueLog::Error('Failed to get oAuth credentials for incoming mails');
+		} catch (IdentityProviderException $e)
+		{
+			IssueLog::Error('Failed to get IMAP oAuth credentials for incoming mails for provider '.$this->oProvider::GetVendorName(), static::LOG_CHANNEL);
+
 			return false;
 		}
 		$sAccessToken = $this->oProvider->GetAccessToken()->getToken();
 
-		if (empty($sAccessToken)) {
+		if (empty($sAccessToken))
+		{
+			IssueLog::Error('No OAuth token for IMAP for provider '.$this->oProvider::GetVendorName(), static::LOG_CHANNEL);
+
 			return false;
 		}
 		$this->sendRequest(
 			'AUTHENTICATE',
 			[
 				'XOAUTH2',
-				base64_encode("user={$user}\001auth=Bearer {$sAccessToken}\001\001")
+				base64_encode("user=$user\001auth=Bearer $sAccessToken\001\001")
 			]
 		);
+		IssueLog::Debug("IMAP Oauth sending AUTHENTICATE XOAUTH2 user=$user auth=Bearer $sAccessToken", static::LOG_CHANNEL);
 
-		while (true) {
-			IssueLog::Info('Boucle login');
-			$response = '';
+		try {
+			while (true) {
+				IssueLog::Info('Boucle login', static::LOG_CHANNEL);
+				$sResponse = '';
 
-			$isPlus = $this->readLine($response, '+', true);
-			if ($isPlus) {
-				// Send empty client response.
-				$this->sendRequest('');
-			} else {
-				if (
-					preg_match('/^NO/i', $response) ||
-					preg_match('/^BAD/i', $response)) {
-					IssueLog::Info('Fin login: fail');
-					return false;
-				}
-				if (preg_match("/^OK /i", $response)){
-					IssueLog::Info('Fin login: réussi :)');
-					$this->auth = true;
-					return true;
+				$isPlus = $this->readLine($sResponse, '+', true);
+				IssueLog::Debug("IMAP Oauth receiving $sResponse", static::LOG_CHANNEL);
+				if ($isPlus) {
+					// Send empty client sResponse.
+					$this->sendRequest('');
+				} else {
+					if (preg_match('/^NO/i', $sResponse) ||
+						preg_match('/^BAD/i', $sResponse)) {
+						IssueLog::Error('Unable to authenticate for IMAP for provider '.$this->oProvider::GetVendorName()." Error: $sResponse", static::LOG_CHANNEL);
+
+						return false;
+					}
+					if (preg_match("/^OK /i", $sResponse)) {
+						return true;
+					}
 				}
 			}
+		} catch (RuntimeException $e) {
+			IssueLog::Error('Timeout connection for IMAP for provider '.$this->oProvider::GetVendorName(), static::LOG_CHANNEL);
 		}
+
 		return false;
 	}
 

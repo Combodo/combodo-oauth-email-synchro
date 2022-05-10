@@ -1,27 +1,29 @@
 <?php
+
 namespace Combodo\iTop\Extension\Service;
-use Combodo\iTop\Core\Authentication\Client\OAuth\OAuthClientProviderAbstract;
-use Combodo\iTop\Core\Authentication\Client\OAuth\OAuthClientProviderFactory;
-use Combodo\iTop\Core\Authentication\Client\OAuth\OAuthClientProviderGoogle;
+
 use Combodo\iTop\Extension\Helper\ProviderHelper;
 use EmailSource;
 use IssueLog;
-use Laminas\Mail\Protocol\Imap;
 use MessageFromMailbox;
 use MetaModel;
 
-class IMAPOAuthEmailSource extends EmailSource{
+class IMAPOAuthEmailSource extends EmailSource
+{
+	const LOG_CHANNEL = 'OAuth';
+
 	/**
 	 * LOGIN username
 	 *
-	 * @var IMAPOAuthLogin
+	 * @var string
 	 */
-	protected $oTransport;
 	protected $sLogin;
+	protected $sServer;
 	/**
-	 * 	 * @var IMAPOAuthStorage
+	 *     * @var IMAPOAuthStorage
 	 */
 	protected $oStorage;
+
 	/**
 	 * Constructor.
 	 *
@@ -30,9 +32,9 @@ class IMAPOAuthEmailSource extends EmailSource{
 	public function __construct($oMailbox)
 	{
 		IssueLog::Info('Debut creation Email Source');
-		$sProtocol = 'ssl';//$oMailbox->Get('protocol');
+		$sProtocol = $oMailbox->Get('protocol');
 		$sServer = $oMailbox->Get('server');
-		$sPwd = $oMailbox->Get('password');
+		$this->sServer = $sServer;
 		$sLogin = $oMailbox->Get('login');
 		$this->sLogin = $sLogin;
 		$sMailbox = $oMailbox->Get('mailbox');
@@ -40,38 +42,38 @@ class IMAPOAuthEmailSource extends EmailSource{
 
 		// Always IMAP with oAuth
 		$aImapOptions = MetaModel::GetModuleSetting('combodo-email-synchro', 'imap_options', array('imap'));
-		//$oTransport = new IMAPOAuthLogin($sServer, $iPort);
 		$this->oStorage = new IMAPOAuthStorage([
-			'user' => $sLogin,
-			'host' => $sServer,
-			'port' => $iPort,
-			'ssl' => $sProtocol,
-			'folder' => $sMailbox,
-			'provider' => ProviderHelper::getProviderForIMAP($oMailbox)
+			'user'     => $sLogin,
+			'host'     => $sServer,
+			'port'     => $iPort,
+			'ssl'      => $sProtocol,
+			'folder'   => $sMailbox,
+			'provider' => ProviderHelper::getProviderForIMAP($oMailbox),
 		]);
 		IssueLog::Info('Fin creation Email Source');
-		//$this->oStorage->setProvider(\ProviderHelper::getProviderForIMAP($oMailbox));
 
-		// Call parent with original arguments
-		parent::__construct($sServer, $iPort, null);
+		// Calls parent with original arguments
+		parent::__construct();
 	}
-	
+
 	public function GetMessagesCount()
 	{
-		IssueLog::Info('Début GetMessagesCount');
+		IssueLog::Debug("IMAPOAuthEmailSource Start GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
 		$c = $this->oStorage->countMessages();
-		IssueLog::Info('Fin GetMessagesCount');
+		IssueLog::Debug("IMAPOAuthEmailSource End GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
+
 		return $c;
-		
+
 	}
 
 	public function GetMessage($index)
 	{
 		$iOffsetIndex = 1 + $index;
-		IssueLog::Info('Début GetMessage de '.$iOffsetIndex);
-		$oMail =  $this->oStorage->getMessage((int) $iOffsetIndex);
+		IssueLog::Debug("IMAPOAuthEmailSource Start GetMessage $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
+		$oMail = $this->oStorage->getMessage($iOffsetIndex);
 		$oNewMail = new MessageFromMailbox($this->oStorage->getUniqueId($iOffsetIndex), $oMail->getHeaders()->toString(), $oMail->getContent());
-		IssueLog::Info('Fin GetMessage de '.$iOffsetIndex);
+		IssueLog::Debug("IMAPOAuthEmailSource End GetMessage $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
+
 		return $oNewMail;
 	}
 
@@ -88,14 +90,12 @@ class IMAPOAuthEmailSource extends EmailSource{
 	public function GetListing()
 	{
 		$aReturn = [];
-		$iIndex = 0;
-		IssueLog::Info('Début GetListing');
 
 		foreach ($this->oStorage as $iMessageId => $oMessage) {
-			IssueLog::Info('GetListing de '.$iMessageId);
+			IssueLog::Debug("IMAPOAuthEmailSource GetListing $iMessageId for $this->sServer", static::LOG_CHANNEL);
 			$aReturn[] = ['msg_id' => $iMessageId, 'uidl' => $this->oStorage->getUniqueId($iMessageId)];
 		}
-		IssueLog::Info('Fin GetListing');
+
 		return $aReturn;
 	}
 

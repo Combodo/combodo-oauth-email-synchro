@@ -1,26 +1,28 @@
 <?php
+
 namespace Combodo\iTop\Extension\Service;
-use Combodo\iTop\Core\Authentication\Client\OAuth\OAuthClientProviderAbstract;
-use Combodo\iTop\Core\Authentication\Client\OAuth\OAuthClientProviderFactory;
-use Combodo\iTop\Core\Authentication\Client\OAuth\OAuthClientProviderGoogle;
+
 use Combodo\iTop\Extension\Helper\ProviderHelper;
 use EmailSource;
-use Laminas\Mail\Protocol\Imap;
 use MessageFromMailbox;
 use MetaModel;
 
-class POP3OAuthEmailSource extends EmailSource{
+class POP3OAuthEmailSource extends EmailSource
+{
+	const LOG_CHANNEL = 'OAuth';
+
 	/**
 	 * LOGIN username
 	 *
-	 * @var POP3OAuthLogin
+	 * @var string
 	 */
-	protected $oTransport;
 	protected $sLogin;
+	protected $sServer;
 	/**
-	 * 	 * @var POP3OAuthStorage
+	 * @var POP3OAuthStorage
 	 */
 	protected $oStorage;
+
 	/**
 	 * Constructor.
 	 *
@@ -30,7 +32,7 @@ class POP3OAuthEmailSource extends EmailSource{
 	{
 		$sProtocol = 'ssl';//$oMailbox->Get('protocol');
 		$sServer = $oMailbox->Get('server');
-		$sPwd = $oMailbox->Get('password');
+		$this->sServer = $sServer;
 		$sLogin = $oMailbox->Get('login');
 		$this->sLogin = $sLogin;
 		$sMailbox = $oMailbox->Get('mailbox');
@@ -38,21 +40,19 @@ class POP3OAuthEmailSource extends EmailSource{
 
 		// Always POP3 with oAuth
 		$aImapOptions = MetaModel::GetModuleSetting('combodo-email-synchro', 'imap_options', array('imap'));
-		//$oTransport = new IMAPOAuthLogin($sServer, $iPort);
 		$this->oStorage = new POP3OAuthStorage([
-			'user' => $sLogin,
-			'host' => $sServer,
-			'port' => $iPort,
-			'ssl' => $sProtocol,
-			'folder' => $sMailbox,
-			'provider' => ProviderHelper::getProviderForPOP3($oMailbox)
+			'user'     => $sLogin,
+			'host'     => $sServer,
+			'port'     => $iPort,
+			'ssl'      => $sProtocol,
+			'folder'   => $sMailbox,
+			'provider' => ProviderHelper::getProviderForPOP3($oMailbox),
 		]);
-		//$this->oStorage->setProvider(\ProviderHelper::getProviderForIMAP($oMailbox));
 
 		// Call parent with original arguments
-		parent::__construct($sServer, $iPort, null);
+		parent::__construct();
 	}
-	
+
 	public function GetMessagesCount()
 	{
 		return $this->oStorage->countMessages();
@@ -61,7 +61,8 @@ class POP3OAuthEmailSource extends EmailSource{
 	public function GetMessage($index)
 	{
 		$iOffsetIndex = 1 + $index;
-		$oMail =  $this->oStorage->getMessage((int) $iOffsetIndex);
+		$oMail = $this->oStorage->getMessage($iOffsetIndex);
+
 		return new MessageFromMailbox($this->oStorage->getUniqueId($iOffsetIndex), $oMail->getHeaders()->toString(), $oMail->getContent());
 	}
 
@@ -78,10 +79,10 @@ class POP3OAuthEmailSource extends EmailSource{
 	public function GetListing()
 	{
 		$aReturn = [];
-		$iIndex = 0;
 		foreach ($this->oStorage as $iMessageId => $oMessage) {
 			$aReturn[] = ['msg_id' => $iMessageId, 'uidl' => $this->oStorage->getUniqueId($iMessageId)];
 		}
+
 		return $aReturn;
 	}
 
