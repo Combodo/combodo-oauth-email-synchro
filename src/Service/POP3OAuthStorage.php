@@ -3,9 +3,7 @@
 namespace Combodo\iTop\Extension\Service;
 
 
-use Laminas\Mail\Storage\Exception\ExceptionInterface;
 use Laminas\Mail\Storage\Exception\InvalidArgumentException;
-use Laminas\Mail\Storage\Exception\RuntimeException;
 use Laminas\Mail\Storage\Pop3;
 
 class POP3OAuthStorage extends Pop3
@@ -20,14 +18,6 @@ class POP3OAuthStorage extends Pop3
 		$this->has['flags'] = true;
 
 		if ($params instanceof POP3OAuthLogin) {
-			$this->protocol = $params;
-			try {
-				$this->selectFolder('INBOX');
-			}
-			catch (ExceptionInterface $e) {
-				throw new  RuntimeException('cannot select INBOX, is this a valid transport?', 0, $e);
-			}
-
 			return;
 		}
 

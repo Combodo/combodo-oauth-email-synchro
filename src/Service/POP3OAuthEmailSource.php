@@ -2,10 +2,11 @@
 
 namespace Combodo\iTop\Extension\Service;
 
+use Combodo\iTop\Extension\Helper\ImapOptionsHelper;
 use Combodo\iTop\Extension\Helper\ProviderHelper;
 use EmailSource;
+use IssueLog;
 use MessageFromMailbox;
-use MetaModel;
 
 class POP3OAuthEmailSource extends EmailSource
 {
@@ -37,16 +38,23 @@ class POP3OAuthEmailSource extends EmailSource
 		$sMailbox = $oMailbox->Get('mailbox');
 		$iPort = $oMailbox->Get('port');
 
-		// Always POP3 with oAuth
-		$aImapOptions = MetaModel::GetModuleSetting('combodo-email-synchro', 'imap_options', array('imap'));
+		IssueLog::Debug("POP3OAuthEmailSource Start for $this->sServer", static::LOG_CHANNEL);
+		$oImapOptions = new ImapOptionsHelper();
+		$sSSL = '';
+		if ($oImapOptions->HasOption('ssl')) {
+			$sSSL = 'ssl';
+		} elseif ($oImapOptions->HasOption('tls')) {
+			$sSSL = 'tls';
+		}
 		$this->oStorage = new POP3OAuthStorage([
 			'user'     => $sLogin,
 			'host'     => $sServer,
 			'port'     => $iPort,
-			'ssl'      => 'ssl',
+			'ssl'      => $sSSL,
 			'folder'   => $sMailbox,
 			'provider' => ProviderHelper::getProviderForPOP3($oMailbox),
 		]);
+		IssueLog::Debug("POP3OAuthEmailSource End for $this->sServer", static::LOG_CHANNEL);
 
 		// Call parent with original arguments
 		parent::__construct();
@@ -54,15 +62,22 @@ class POP3OAuthEmailSource extends EmailSource
 
 	public function GetMessagesCount()
 	{
-		return $this->oStorage->countMessages();
+		IssueLog::Debug("POP3OAuthEmailSource Start GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
+		$iCount = $this->oStorage->countMessages();
+		IssueLog::Debug("POP3OAuthEmailSource End GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
+
+		return $iCount;
 	}
 
 	public function GetMessage($index)
 	{
 		$iOffsetIndex = 1 + $index;
+		IssueLog::Debug("POP3OAuthEmailSource Start GetMessage $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
 		$oMail = $this->oStorage->getMessage($iOffsetIndex);
+		$oNewMail = new MessageFromMailbox($this->oStorage->getUniqueId($iOffsetIndex), $oMail->getHeaders()->toString(), $oMail->getContent());
+		IssueLog::Debug("POP3OAuthEmailSource End GetMessage $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
 
-		return new MessageFromMailbox($this->oStorage->getUniqueId($iOffsetIndex), $oMail->getHeaders()->toString(), $oMail->getContent());
+		return $oNewMail;
 	}
 
 	public function DeleteMessage($index)
@@ -79,6 +94,7 @@ class POP3OAuthEmailSource extends EmailSource
 	{
 		$aReturn = [];
 		foreach ($this->oStorage as $iMessageId => $oMessage) {
+			IssueLog::Debug("POP3OAuthEmailSource GetListing $iMessageId for $this->sServer", static::LOG_CHANNEL);
 			$aReturn[] = ['msg_id' => $iMessageId, 'uidl' => $this->oStorage->getUniqueId($iMessageId)];
 		}
 

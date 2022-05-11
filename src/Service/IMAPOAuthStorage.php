@@ -27,14 +27,14 @@ class IMAPOAuthStorage extends Imap
 				$this->selectFolder('INBOX');
 			}
 			catch (ExceptionInterface $e) {
-				throw new  RuntimeException('cannot select INBOX, is this a valid transport?', 0, $e);
+				throw new  RuntimeException('IMAPOAuthStorage cannot select INBOX, is this a valid transport?', 0, $e);
 			}
 
 			return;
 		}
 
 		if (!isset($params->user)) {
-			throw new  InvalidArgumentException('need at least user in params');
+			throw new  InvalidArgumentException('IMAPOAuthStorage need at least user in params');
 		}
 
 		$host = isset($params->host) ? $params->host : 'localhost';

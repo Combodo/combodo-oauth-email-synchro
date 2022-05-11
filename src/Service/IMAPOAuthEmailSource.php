@@ -2,11 +2,11 @@
 
 namespace Combodo\iTop\Extension\Service;
 
+use Combodo\iTop\Extension\Helper\ImapOptionsHelper;
 use Combodo\iTop\Extension\Helper\ProviderHelper;
 use EmailSource;
 use IssueLog;
 use MessageFromMailbox;
-use MetaModel;
 
 class IMAPOAuthEmailSource extends EmailSource
 {
@@ -39,13 +39,18 @@ class IMAPOAuthEmailSource extends EmailSource
 		$iPort = $oMailbox->Get('port');
 
 		IssueLog::Debug("IMAPOAuthEmailSource Start for $this->sServer", static::LOG_CHANNEL);
-		// Always IMAP with oAuth
-		$aImapOptions = MetaModel::GetModuleSetting('combodo-email-synchro', 'imap_options', array('imap'));
+		$oImapOptions = new ImapOptionsHelper();
+		$sSSL = '';
+		if ($oImapOptions->HasOption('ssl')) {
+			$sSSL = 'ssl';
+		} elseif ($oImapOptions->HasOption('tls')) {
+			$sSSL = 'tls';
+		}
 		$this->oStorage = new IMAPOAuthStorage([
 			'user'     => $sLogin,
 			'host'     => $sServer,
 			'port'     => $iPort,
-			'ssl'      => 'ssl',
+			'ssl'      => $sSSL,
 			'folder'   => $sMailbox,
 			'provider' => ProviderHelper::getProviderForIMAP($oMailbox),
 		]);
@@ -58,10 +63,10 @@ class IMAPOAuthEmailSource extends EmailSource
 	public function GetMessagesCount()
 	{
 		IssueLog::Debug("IMAPOAuthEmailSource Start GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
-		$c = $this->oStorage->countMessages();
+		$iCount = $this->oStorage->countMessages();
 		IssueLog::Debug("IMAPOAuthEmailSource End GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
 
-		return $c;
+		return $iCount;
 
 	}
 
