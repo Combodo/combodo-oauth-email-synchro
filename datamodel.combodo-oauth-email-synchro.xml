@@ -146,6 +146,9 @@
                     <item id="email_storage">
                       <rank>20</rank>
                     </item>
+                    <item id="target_folder">
+                      <rank>25</rank>
+                    </item>
                     <item id="target_class">
                       <rank>30</rank>
                     </item>

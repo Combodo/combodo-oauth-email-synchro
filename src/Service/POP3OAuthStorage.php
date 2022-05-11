@@ -18,6 +18,7 @@ class POP3OAuthStorage extends Pop3
 		$this->has['flags'] = true;
 
 		if ($params instanceof POP3OAuthLogin) {
+			$this->protocol = $params;
 			return;
 		}
 

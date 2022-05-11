@@ -23,6 +23,7 @@ class IMAPOAuthEmailSource extends EmailSource
 	 *     * @var IMAPOAuthStorage
 	 */
 	protected $oStorage;
+	protected $sTargetFolder;
 
 	/**
 	 * Constructor.
@@ -37,6 +38,7 @@ class IMAPOAuthEmailSource extends EmailSource
 		$this->sLogin = $sLogin;
 		$sMailbox = $oMailbox->Get('mailbox');
 		$iPort = $oMailbox->Get('port');
+		$this->sTargetFolder = $oMailbox->Get('target_folder');
 
 		IssueLog::Debug("IMAPOAuthEmailSource Start for $this->sServer", static::LOG_CHANNEL);
 		$oImapOptions = new ImapOptionsHelper();
@@ -83,7 +85,7 @@ class IMAPOAuthEmailSource extends EmailSource
 
 	public function DeleteMessage($index)
 	{
-		$this->oStorage->removeMessage($index);
+		$this->oStorage->removeMessage(1 + $index);
 	}
 
 	public function GetName()
@@ -101,6 +103,18 @@ class IMAPOAuthEmailSource extends EmailSource
 		}
 
 		return $aReturn;
+	}
+
+	/**
+	 * Move the message of the given index [0..Count] from the mailbox to another folder
+	 *
+	 * @param $index integer The index between zero and count
+	 */
+	public function MoveMessage($index)
+	{
+		$this->oStorage->moveMessage(1 + $index, $this->sTargetFolder);
+
+		return true;
 	}
 
 	public function Disconnect()
