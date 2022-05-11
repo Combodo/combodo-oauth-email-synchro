@@ -30,7 +30,6 @@ class POP3OAuthEmailSource extends EmailSource
 	 */
 	public function __construct($oMailbox)
 	{
-		$sProtocol = 'ssl';//$oMailbox->Get('protocol');
 		$sServer = $oMailbox->Get('server');
 		$this->sServer = $sServer;
 		$sLogin = $oMailbox->Get('login');
@@ -44,7 +43,7 @@ class POP3OAuthEmailSource extends EmailSource
 			'user'     => $sLogin,
 			'host'     => $sServer,
 			'port'     => $iPort,
-			'ssl'      => $sProtocol,
+			'ssl'      => 'ssl',
 			'folder'   => $sMailbox,
 			'provider' => ProviderHelper::getProviderForPOP3($oMailbox),
 		]);

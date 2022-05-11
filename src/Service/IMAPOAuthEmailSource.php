@@ -31,8 +31,6 @@ class IMAPOAuthEmailSource extends EmailSource
 	 */
 	public function __construct($oMailbox)
 	{
-		IssueLog::Info('Debut creation Email Source');
-		$sProtocol = $oMailbox->Get('protocol');
 		$sServer = $oMailbox->Get('server');
 		$this->sServer = $sServer;
 		$sLogin = $oMailbox->Get('login');
@@ -40,17 +38,18 @@ class IMAPOAuthEmailSource extends EmailSource
 		$sMailbox = $oMailbox->Get('mailbox');
 		$iPort = $oMailbox->Get('port');
 
+		IssueLog::Debug("IMAPOAuthEmailSource Start for $this->sServer", static::LOG_CHANNEL);
 		// Always IMAP with oAuth
 		$aImapOptions = MetaModel::GetModuleSetting('combodo-email-synchro', 'imap_options', array('imap'));
 		$this->oStorage = new IMAPOAuthStorage([
 			'user'     => $sLogin,
 			'host'     => $sServer,
 			'port'     => $iPort,
-			'ssl'      => $sProtocol,
+			'ssl'      => 'ssl',
 			'folder'   => $sMailbox,
 			'provider' => ProviderHelper::getProviderForIMAP($oMailbox),
 		]);
-		IssueLog::Info('Fin creation Email Source');
+		IssueLog::Debug("IMAPOAuthEmailSource End for $this->sServer", static::LOG_CHANNEL);
 
 		// Calls parent with original arguments
 		parent::__construct();
