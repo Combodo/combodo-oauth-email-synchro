@@ -64,6 +64,7 @@ class POP3OAuthLogin extends Pop3
 					// Send empty client response.
 					$this->request('');
 				} else {
+					IssueLog::Debug("IMAP Oauth receiving $sResponse", static::LOG_CHANNEL);
 					if (preg_match('/^NO/i', $sResponse) ||
 						preg_match('/^BAD/i', $sResponse)) {
 						IssueLog::Error('Unable to authenticate for POP3 for provider '.$this->oProvider::GetVendorName()." Error: $sResponse", static::LOG_CHANNEL);

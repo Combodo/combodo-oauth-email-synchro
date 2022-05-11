@@ -64,7 +64,7 @@ class POP3OAuthEmailSource extends EmailSource
 	{
 		IssueLog::Debug("POP3OAuthEmailSource Start GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
 		$iCount = $this->oStorage->countMessages();
-		IssueLog::Debug("POP3OAuthEmailSource End GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
+		IssueLog::Debug("POP3OAuthEmailSource $iCount message(s) found for $this->sServer", static::LOG_CHANNEL);
 
 		return $iCount;
 	}
@@ -82,7 +82,7 @@ class POP3OAuthEmailSource extends EmailSource
 
 	public function DeleteMessage($index)
 	{
-		$this->oStorage->removeMessage($index);
+		$this->oStorage->removeMessage(1 + $index);
 	}
 
 	public function GetName()

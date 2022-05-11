@@ -71,7 +71,6 @@ class IMAPOAuthLogin extends Imap
 
 		try {
 			while (true) {
-				IssueLog::Info('Boucle login', static::LOG_CHANNEL);
 				$sResponse = '';
 
 				$isPlus = $this->readLine($sResponse, '+', true);

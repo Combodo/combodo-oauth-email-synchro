@@ -66,7 +66,7 @@ class IMAPOAuthEmailSource extends EmailSource
 	{
 		IssueLog::Debug("IMAPOAuthEmailSource Start GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
 		$iCount = $this->oStorage->countMessages();
-		IssueLog::Debug("IMAPOAuthEmailSource End GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
+		IssueLog::Debug("IMAPOAuthEmailSource $iCount message(s) found for $this->sServer", static::LOG_CHANNEL);
 
 		return $iCount;
 
