@@ -43,4 +43,8 @@ JS;
 
 	}
 
+	public static function GetResultDisplayTemplate()
+	{
+		// TODO: Implement GetResultDisplayTemplate() method.
+	}
 }
