@@ -45,6 +45,6 @@ JS;
 
 	public static function GetResultDisplayTemplate()
 	{
-		// TODO: Implement GetResultDisplayTemplate() method.
+		return 'DisplayMailboxGenerator.html.twig';
 	}
 }
