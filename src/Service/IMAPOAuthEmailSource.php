@@ -12,16 +12,10 @@ class IMAPOAuthEmailSource extends EmailSource
 {
 	const LOG_CHANNEL = 'OAuth';
 
-	/**
-	 * LOGIN username
-	 *
-	 * @var string
-	 */
+	/** LOGIN username @var string */
 	protected $sLogin;
 	protected $sServer;
-	/**
-	 *     * @var IMAPOAuthStorage
-	 */
+	/** * @var IMAPOAuthStorage */
 	protected $oStorage;
 	protected $sTargetFolder;
 
@@ -37,6 +31,7 @@ class IMAPOAuthEmailSource extends EmailSource
 		$sLogin = $oMailbox->Get('login');
 		$this->sLogin = $sLogin;
 		$sMailbox = $oMailbox->Get('mailbox');
+		$this->sMailbox = $sMailbox;
 		$iPort = $oMailbox->Get('port');
 		$this->sTargetFolder = $oMailbox->Get('target_folder');
 
@@ -120,5 +115,10 @@ class IMAPOAuthEmailSource extends EmailSource
 	public function Disconnect()
 	{
 		$this->oStorage->logout();
+	}
+
+	public function GetMailbox()
+	{
+		return $this->sMailbox;
 	}
 }
