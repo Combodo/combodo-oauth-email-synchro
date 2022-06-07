@@ -10,6 +10,8 @@ Dict::Add('FR FR', 'French', 'Français', array(
 	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Title' => 'Créer une boite mail',
 	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Description' => 'Créer une boite mail à synchroniser avec une boite mail distante utilisant cette connexion oAuth 2.0',
 	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:CreateNewMailbox' => 'Créer une nouvelle boite mail',
+
+	'UI:OAuthEmailSynchro:Error:UnknownVendor' => 'Le provider Oauth 2.0 %1$s n\'existe pas',
 ));
 
 //

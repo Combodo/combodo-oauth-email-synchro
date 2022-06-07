@@ -1,6 +1,8 @@
 <?php
 namespace Combodo\iTop\Extension\Helper;
 
+use Dict;
+use Exception;
 use GuzzleHttp\Client;
 
 class ProviderHelper{
@@ -8,6 +10,10 @@ class ProviderHelper{
 	{
 		$sProviderVendor = $oMailbox->Get('oauth_provider');
 		$sProviderClass = "\Combodo\iTop\Core\Authentication\Client\OAuth\OAuthClientProvider".$sProviderVendor;
+
+		if (!class_exists($sProviderClass)) {
+			throw new Exception(dict::Format('UI:OAuthEmailSynchro:Error:UnknownVendor', $sProviderVendor));
+		}
 
 		$aProviderVendorParams = [
 			'clientId'     => $oMailbox->Get('oauth_client_id'),  // email_transport_smtp.oauth.client_id
