@@ -70,9 +70,10 @@ class IMAPOAuthEmailSource extends EmailSource
 	public function GetMessage($index)
 	{
 		$iOffsetIndex = 1 + $index;
-		IssueLog::Debug("IMAPOAuthEmailSource Start GetMessage $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
+		$sUIDL = $this->oStorage->getUniqueId($iOffsetIndex);
+		IssueLog::Debug("IMAPOAuthEmailSource Start GetMessage $iOffsetIndex (UID $sUIDL) for $this->sServer", static::LOG_CHANNEL);
 		$oMail = $this->oStorage->getMessage($iOffsetIndex);
-		$oNewMail = new MessageFromMailbox($this->oStorage->getUniqueId($iOffsetIndex), $oMail->getHeaders()->toString(), $oMail->getContent());
+		$oNewMail = new MessageFromMailbox($sUIDL, $oMail->getHeaders()->toString(), $oMail->getContent());
 		IssueLog::Debug("IMAPOAuthEmailSource End GetMessage $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
 
 		return $oNewMail;

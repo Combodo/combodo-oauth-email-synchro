@@ -4,6 +4,7 @@ namespace Combodo\iTop\Extension\Service;
 
 
 use IssueLog;
+use Laminas\Mail\Storage;
 use Laminas\Mail\Storage\Exception\ExceptionInterface;
 use Laminas\Mail\Storage\Exception\InvalidArgumentException;
 use Laminas\Mail\Storage\Exception\RuntimeException;
@@ -44,9 +45,9 @@ class IMAPOAuthStorage extends Imap
 
 		$this->protocol = new IMAPOAuthLogin($params->provider);
 
-		if (isset($params->novalidatecert)) {
-			$this->protocol->setNoValidateCert((bool)$params->novalidatecert);
-		}
+		//		if (isset($params->novalidatecert)) {
+		//			$this->protocol->setNoValidateCert((bool)$params->novalidatecert);
+		//		}
 
 		$this->protocol->connect($host, $port, $ssl);
 		if (!$this->protocol->login($params->user, $password)) {
@@ -58,7 +59,29 @@ class IMAPOAuthStorage extends Imap
 
 	public function logout()
 	{
+		// EXPUNGE at the end to keep the message id correct
+		if (! $this->protocol->expunge()) {
+			throw new RuntimeException('message marked as deleted, but could not expunge');
+		}
+
 		$this->protocol->logout();
+	}
+
+	/**
+	 * Remove a message from server.
+	 *
+	 * If you're doing that from a web environment you should be careful and
+	 * use a uniqueid as parameter if possible to identify the message.
+	 *
+	 * @param  int $id number of message
+	 * @throws RuntimeException
+	 */
+	public function removeMessage($id)
+	{
+		if (! $this->protocol->store([Storage::FLAG_DELETED], $id, null, '+')) {
+			throw new RuntimeException('cannot set deleted flag');
+		}
+		// Postpone EXPUNGE until logout
 	}
 
 }
