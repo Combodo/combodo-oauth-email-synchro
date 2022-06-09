@@ -115,7 +115,7 @@ class IMAPOAuthEmailSource extends EmailSource
 
 	public function Disconnect()
 	{
-		$this->oStorage->logout();
+		$this->oStorage->close();
 	}
 
 	public function GetMailbox()

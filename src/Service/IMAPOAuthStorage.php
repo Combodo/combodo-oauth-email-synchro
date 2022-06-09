@@ -45,10 +45,6 @@ class IMAPOAuthStorage extends Imap
 
 		$this->protocol = new IMAPOAuthLogin($params->provider);
 
-		//		if (isset($params->novalidatecert)) {
-		//			$this->protocol->setNoValidateCert((bool)$params->novalidatecert);
-		//		}
-
 		$this->protocol->connect($host, $port, $ssl);
 		if (!$this->protocol->login($params->user, $password)) {
 			IssueLog::Error("Cannot login to IMAP OAuth for mailbox $host", static::LOG_CHANNEL);
@@ -57,26 +53,11 @@ class IMAPOAuthStorage extends Imap
 		$this->selectFolder(isset($params->folder) ? $params->folder : 'INBOX');
 	}
 
-	public function __destruct()
-	{
-		$this->logout();
-	}
-
-	public function logout()
-	{
-		// EXPUNGE at the end to keep the message id correct
-		if (! $this->protocol->expunge()) {
-			throw new RuntimeException('message marked as deleted, but could not expunge');
-		}
-
-		$this->protocol->logout();
-	}
-
 	/**
 	 * Remove a message from server.
 	 *
 	 * If you're doing that from a web environment you should be careful and
-	 * use a uniqueid as parameter if possible to identify the message.
+	 * use a unique id as parameter if possible to identify the message.
 	 *
 	 * @param  int $id number of message
 	 * @throws RuntimeException
