@@ -57,6 +57,11 @@ class IMAPOAuthStorage extends Imap
 		$this->selectFolder(isset($params->folder) ? $params->folder : 'INBOX');
 	}
 
+	public function __destruct()
+	{
+		$this->logout();
+	}
+
 	public function logout()
 	{
 		// EXPUNGE at the end to keep the message id correct
