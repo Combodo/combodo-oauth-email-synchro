@@ -10,7 +10,7 @@
       </php_parent>
       <parent>cmdbAbstractObject</parent>
       <properties>
-        <comment></comment>
+        <comment/>
         <category>searchable,view_in_gui,bizmodel</category>
         <abstract>false</abstract>
         <key_type>autoincrement</key_type>
@@ -34,41 +34,47 @@
             <attribute id="port" />
           </attributes>
         </reconciliation>
+        <uniqueness_rules>
+          <rule id="OAuth">
+            <attributes>
+              <attribute id="remote_authent_oauth_id"/>
+              <attribute id="mailbox"/>
+            </attributes>
+            <filter/>
+            <disabled>false</disabled>
+            <is_blocking>true</is_blocking>
+          </rule>
+        </uniqueness_rules>
       </properties>
       <fields>
-        <field id="oauth_provider" xsi:type="AttributeText">
-          <sql>oauth_provider</sql>
-          <default_value />
-          <is_null_allowed>true</is_null_allowed>
-          <tracking_level>none</tracking_level>
+        <field id="remote_authent_oauth_id" xsi:type="AttributeExternalKey">
+          <filter/>
+          <dependencies/>
+          <sql>remote_authent_oauth_id</sql>
+          <target_class>RemoteAuthentOAuth</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+          <allow_target_creation>false</allow_target_creation>
         </field>
-        <field id="oauth_client_id" xsi:type="AttributeText">
-          <sql>oauth_client_id</sql>
-          <default_value />
-          <is_null_allowed>true</is_null_allowed>
-          <dependencies>
-            <attribute id="protocol" />
-          </dependencies>
+        <field id="oauth_provider" xsi:type="AttributeExternalField">
+          <extkey_attcode>remote_authent_oauth_id</extkey_attcode>
+          <target_attcode>provider</target_attcode>
         </field>
-        <field id="oauth_client_secret" xsi:type="AttributeText">
-          <sql>oauth_client_secret</sql>
-          <default_value />
-          <is_null_allowed>true</is_null_allowed>
-          <dependencies>
-            <attribute id="protocol" />
-          </dependencies>
+        <field id="oauth_client_id" xsi:type="AttributeExternalField">
+          <extkey_attcode>remote_authent_oauth_id</extkey_attcode>
+          <target_attcode>client_id</target_attcode>
         </field>
-        <field id="oauth_access_token" xsi:type="AttributeText">
-          <sql>oauth_token</sql>
-          <default_value />
-          <is_null_allowed>true</is_null_allowed>
-          <tracking_level>none</tracking_level>
+        <field id="oauth_client_secret" xsi:type="AttributeExternalField">
+          <extkey_attcode>remote_authent_oauth_id</extkey_attcode>
+          <target_attcode>client_secret</target_attcode>
         </field>
-        <field id="oauth_refresh_token" xsi:type="AttributeText">
-          <sql>oauth_refresh_token</sql>
-          <default_value />
-          <is_null_allowed>true</is_null_allowed>
-          <tracking_level>none</tracking_level>
+        <field id="oauth_access_token" xsi:type="AttributeExternalField">
+          <extkey_attcode>remote_authent_oauth_id</extkey_attcode>
+          <target_attcode>token</target_attcode>
+        </field>
+        <field id="oauth_refresh_token" xsi:type="AttributeExternalField">
+          <extkey_attcode>remote_authent_oauth_id</extkey_attcode>
+          <target_attcode>refresh_token</target_attcode>
         </field>
       </fields>
       <presentation>
@@ -92,20 +98,8 @@
                     <item id="port">
                       <rank>20</rank>
                     </item>
-                    <item id="oauth_provider">
+                    <item id="remote_authent_oauth_id">
                       <rank>30</rank>
-                    </item>
-                    <item id="oauth_client_id">
-                      <rank>40</rank>
-                    </item>
-                    <item id="oauth_client_secret">
-                      <rank>50</rank>
-                    </item>
-                    <item id="oauth_access_token">
-                      <rank>60</rank>
-                    </item>
-                    <item id="oauth_refresh_token">
-                      <rank>60</rank>
                     </item>
                     <item id="mailbox">
                       <rank>70</rank>
@@ -209,6 +203,9 @@
             <item id="active">
               <rank>50</rank>
             </item>
+            <item id="remote_authent_oauth_id">
+              <rank>60</rank>
+            </item>
           </items>
         </search>
         <list>
@@ -224,6 +221,9 @@
             </item>
             <item id="active">
               <rank>40</rank>
+            </item>
+            <item id="remote_authent_oauth_id">
+              <rank>60</rank>
             </item>
           </items>
         </list>

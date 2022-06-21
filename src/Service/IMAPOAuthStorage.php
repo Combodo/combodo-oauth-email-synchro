@@ -68,6 +68,7 @@ class IMAPOAuthStorage extends Imap
 			throw new RuntimeException('cannot set deleted flag');
 		}
 		// Postpone EXPUNGE until logout
+		$this->protocol->SetHasDeletedMails(true);
 	}
 
 }

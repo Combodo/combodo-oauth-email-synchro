@@ -10,7 +10,7 @@ class ImapOptionsHelper
 
 	public function __construct()
 	{
-		$this->aImapOptions = MetaModel::GetModuleSetting('combodo-email-synchro', 'imap_options', array('imap'));
+		$this->aImapOptions = MetaModel::GetModuleSetting('combodo-email-synchro', 'imap_options', ['imap']);
 	}
 
 	public function HasOption($sOption)
