@@ -31,4 +31,6 @@ Dict::Add('FR FR', 'French', 'Français', array(
 	'Class:MailInboxOAuth/Attribute:oauth_access_token+' => '',
 	'Class:MailInboxOAuth/Attribute:oauth_refresh_token' => 'Jeton de renouvellement Oauth 2.0',
 	'Class:MailInboxOAuth/Attribute:oauth_refresh_token+' => '',
+	'Class:MailInboxOAuth/Attribute:remote_authent_oauth_id' => 'Connexion (OAuth)~~',
+	'Class:MailInboxOAuth/Attribute:remote_authent_oauth_id+' => '',
 ));

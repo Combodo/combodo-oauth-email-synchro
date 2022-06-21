@@ -31,4 +31,6 @@ Dict::Add('CS CZ', 'Czech', 'Čeština', array(
 	'Class:MailInboxOAuth/Attribute:oauth_access_token+' => '~~',
 	'Class:MailInboxOAuth/Attribute:oauth_refresh_token' => 'Oauth refresh token~~',
 	'Class:MailInboxOAuth/Attribute:oauth_refresh_token+' => '~~',
+	'Class:MailInboxOAuth/Attribute:remote_authent_oauth_id' => 'Remote Authentication (OAuth)~~',
+	'Class:MailInboxOAuth/Attribute:remote_authent_oauth_id+' => '',
 ));
