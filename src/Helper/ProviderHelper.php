@@ -16,14 +16,14 @@ class ProviderHelper{
 		}
 
 		$aProviderVendorParams = [
-			'clientId'     => $oMailbox->Get('oauth_client_id'),  // email_transport_smtp.oauth.client_id
-			'clientSecret' => $oMailbox->Get('oauth_client_secret'),// email_transport_smtp.oauth.client_secret
+			'clientId'     => $oMailbox->Get('client_id'),  // email_transport_smtp.oauth.client_id
+			'clientSecret' => $oMailbox->Get('client_secret'),// email_transport_smtp.oauth.client_secret
 			'redirectUri'  => $sProviderClass::GetRedirectUri(),
 			'scope' => $sProviderClass::GetRequiredSMTPScope()
 		];
 		$aAccessTokenParams = [
-			"access_token"  => $oMailbox->Get('oauth_access_token'), // email_transport_smtp.oauth.access_token
-			"refresh_token" => $oMailbox->Get('oauth_refresh_token'), // email_transport_smtp.oauth.refresh_token
+			"access_token"  => $oMailbox->Get('access_token'), // email_transport_smtp.oauth.access_token
+			"refresh_token" => $oMailbox->Get('refresh_token'), // email_transport_smtp.oauth.refresh_token
 			'scope' => $sProviderClass::GetRequiredSMTPScope()
 		];
 		$aCollaborators = [
@@ -39,14 +39,14 @@ class ProviderHelper{
 		$sProviderClass = "\Combodo\iTop\Core\Authentication\Client\OAuth\OAuthClientProvider".$sProviderVendor;
 
 		$aProviderVendorParams = [
-			'clientId'     => $oMailbox->Get('oauth_client_id'),  // email_transport_smtp.oauth.client_id
-			'clientSecret' => $oMailbox->Get('oauth_client_secret'),// email_transport_smtp.oauth.client_secret
+			'clientId'     => $oMailbox->Get('client_id'),  // email_transport_smtp.oauth.client_id
+			'clientSecret' => $oMailbox->Get('client_secret'),// email_transport_smtp.oauth.client_secret
 			'redirectUri'  => $sProviderClass::GetRedirectUri(),
 			'scope' => $sProviderClass::GetRequiredSMTPScope()
 		];
 		$aAccessTokenParams = [
-			"access_token"  => $oMailbox->Get('oauth_access_token'), // email_transport_smtp.oauth.access_token
-			"refresh_token" => $oMailbox->Get('oauth_refresh_token'), // email_transport_smtp.oauth.refresh_token
+			"access_token"  => $oMailbox->Get('access_token'), // email_transport_smtp.oauth.access_token
+			"refresh_token" => $oMailbox->Get('refresh_token'), // email_transport_smtp.oauth.refresh_token
 			'scope' => $sProviderClass::GetRequiredSMTPScope()
 		];
 		$aCollaborators = [
