@@ -240,22 +240,8 @@
           <type>Overload-DBObject</type>
           <code><![CDATA[	public function GetEmailSource()
 	{
-		$sProtocol = $this->Get('protocol');
-		$sServer = $this->Get('server');
-		$sPwd = $this->Get('password');
-		$sLogin = $this->Get('login');
-		$sMailbox = $this->Get('mailbox');
-		$iPort = $this->Get('port');
-	
-		// Always IMAP with oAuth
-		$aImapOptions = MetaModel::GetModuleSetting('combodo-email-synchro', 'imap_options', array('imap'));
-		if($sProtocol === 'imap'){
 		  $oSource = new Combodo\iTop\Extension\Service\IMAPOAuthEmailSource($this);
-		}
-		else{
-			$oSource = new Combodo\iTop\Extension\Service\POP3OAuthEmailSource($this);
-		}
-		return $oSource;
+		  return $oSource;
 	}]]></code>
         </method>
         <method id="GetAttributeFlags">

@@ -26,9 +26,6 @@ class ComposerStaticInit7d552f71dc727087f01015ac5dd4ed0b
         'Combodo\\iTop\\Extension\\Service\\IMAPOAuthEmailSource' => __DIR__ . '/../..' . '/src/Service/IMAPOAuthEmailSource.php',
         'Combodo\\iTop\\Extension\\Service\\IMAPOAuthLogin' => __DIR__ . '/../..' . '/src/Service/IMAPOAuthLogin.php',
         'Combodo\\iTop\\Extension\\Service\\IMAPOAuthStorage' => __DIR__ . '/../..' . '/src/Service/IMAPOAuthStorage.php',
-        'Combodo\\iTop\\Extension\\Service\\POP3OAuthEmailSource' => __DIR__ . '/../..' . '/src/Service/POP3OAuthEmailSource.php',
-        'Combodo\\iTop\\Extension\\Service\\POP3OAuthLogin' => __DIR__ . '/../..' . '/src/Service/POP3OAuthLogin.php',
-        'Combodo\\iTop\\Extension\\Service\\POP3OAuthStorage' => __DIR__ . '/../..' . '/src/Service/POP3OAuthStorage.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 

@@ -18,11 +18,14 @@ class IMAPOAuthEmailSource extends EmailSource
 	/** * @var IMAPOAuthStorage */
 	protected $oStorage;
 	protected $sTargetFolder;
+	protected $sMailbox;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param $oMailbox
+	 *
+	 * @throws \Exception
 	 */
 	public function __construct($oMailbox)
 	{
