@@ -92,14 +92,14 @@
                     <item id="login">
                       <rank>20</rank>
                     </item>
-                    <item id="protocol">
-                      <rank>20</rank>
-                    </item>
-                    <item id="port">
-                      <rank>20</rank>
-                    </item>
                     <item id="oauth_client_id">
                       <rank>30</rank>
+                    </item>
+                    <item id="protocol">
+                      <rank>40</rank>
+                    </item>
+                    <item id="port">
+                      <rank>50</rank>
                     </item>
                     <item id="mailbox">
                       <rank>70</rank>
@@ -216,14 +216,14 @@
             <item id="mailbox">
               <rank>20</rank>
             </item>
-            <item id="protocol">
+            <item id="oauth_client_id">
               <rank>30</rank>
             </item>
-            <item id="active">
+            <item id="protocol">
               <rank>40</rank>
             </item>
-            <item id="oauth_client_id">
-              <rank>60</rank>
+            <item id="active">
+              <rank>50</rank>
             </item>
           </items>
         </list>
