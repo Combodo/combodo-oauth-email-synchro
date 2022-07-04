@@ -16,7 +16,8 @@ SetupWebPage::AddModule(
 		//
 		'dependencies' => array(
 			'combodo-email-synchro/3.5.2',
-			'itop-standard-email-synchro/3.4.1'
+			'itop-standard-email-synchro/3.4.1',
+			'itop-oauth-client/2.7.7',
 		),
 		'mandatory' => false,
 		'visible' => true,
