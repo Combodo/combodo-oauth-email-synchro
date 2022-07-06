@@ -5,10 +5,7 @@
   </constants>
   <classes>
     <class id="MailInboxOAuth" _delta="define">
-      <php_parent>
-        <name>MailInboxStandard</name>
-      </php_parent>
-      <parent>cmdbAbstractObject</parent>
+      <parent>MailInboxStandard</parent>
       <properties>
         <comment/>
         <category>searchable,view_in_gui,bizmodel</category>
