@@ -8,7 +8,7 @@
       <parent>MailInboxStandard</parent>
       <properties>
         <comment/>
-        <category>searchable,view_in_gui,bizmodel</category>
+        <category>grant_by_profile,application</category>
         <abstract>false</abstract>
         <key_type>autoincrement</key_type>
         <db_table>mailinbox_oauth</db_table>
