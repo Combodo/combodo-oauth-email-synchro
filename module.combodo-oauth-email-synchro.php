@@ -5,12 +5,12 @@
 
 SetupWebPage::AddModule(
 	__FILE__, // Path to the current file, all other file names are relative to the directory containing this file
-	'combodo-oauth-email-synchro/1.0.0',
+	'combodo-oauth-email-synchro/1.1.0',
 	array(
 		// Identification
 		//
-		'label' => 'OAuth email syncro',
-		'category' => 'business',
+		'label'        => 'OAuth email syncro',
+		'category'     => 'business',
 
 		// Setup
 		//
