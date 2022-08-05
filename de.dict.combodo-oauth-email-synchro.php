@@ -7,11 +7,11 @@
  */
 
 Dict::Add('DE DE', 'German', 'Deutsch', array(
-	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Title' => 'Create a Mailbox~~',
-	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Description' => 'Create a new Mailbox to fetch emails from a remote mail provider using this OAuth connection as authentication method~~',
-	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:CreateNewMailbox' => 'Create a new mailbox~~',
+	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Title' => 'Mailpostfach erstellen',
+	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Description' => 'Erstellen eines neuen Mailpostfachs zum Abrufen von Mails unter der Nutzung  der Authentifizierung über OAuth',
+	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:CreateNewMailbox' => 'Neue Mailbox erstellen',
 
-	'UI:OAuthEmailSynchro:Error:UnknownVendor' => 'OAuth provider %1$s does not exist~~',
+	'UI:OAuthEmailSynchro:Error:UnknownVendor' => 'Der OAuth-Provider %1$s existiert nicht',
 ));
 
 //
@@ -19,10 +19,10 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 //
 
 Dict::Add('DE DE', 'German', 'Deutsch', array(
-	'Class:MailInboxOAuth' => 'MailInboxOAuth~~',
-	'Class:MailInboxOAuth+' => '~~',
-	'Class:MailInboxOAuth/Attribute:oauth_provider' => 'Oauth provider~~',
-	'Class:MailInboxOAuth/Attribute:oauth_provider+' => '~~',
-	'Class:MailInboxOAuth/Attribute:oauth_client_id' => 'OAuth client~~',
+	'Class:MailInboxOAuth' => 'OAuth 2.0 Maileingangspostfach',
+	'Class:MailInboxOAuth+' => '',
+	'Class:MailInboxOAuth/Attribute:oauth_provider' => 'OAuth-Provider',
+	'Class:MailInboxOAuth/Attribute:oauth_provider+' => '',
+	'Class:MailInboxOAuth/Attribute:oauth_client_id' => 'OAuth-Client',
 	'Class:MailInboxOAuth/Attribute:oauth_client_id+' => '',
 ));
