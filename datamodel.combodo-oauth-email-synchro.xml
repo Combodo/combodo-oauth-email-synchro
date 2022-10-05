@@ -31,17 +31,6 @@
             <attribute id="port" />
           </attributes>
         </reconciliation>
-        <uniqueness_rules>
-          <rule id="OAuth Client">
-            <attributes>
-              <attribute id="oauth_client_id"/>
-              <attribute id="mailbox"/>
-            </attributes>
-            <filter/>
-            <disabled>false</disabled>
-            <is_blocking>true</is_blocking>
-          </rule>
-        </uniqueness_rules>
       </properties>
       <fields>
         <field id="oauth_client_id" xsi:type="AttributeExternalKey">
