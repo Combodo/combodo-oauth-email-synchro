@@ -92,6 +92,11 @@ class IMAPOAuthEmailSource extends EmailSource
 		return $this->sLogin;
 	}
 
+	public function GetSourceId()
+	{
+		return $this->sServer.'/'.$this->sLogin;
+	}
+
 	public function GetListing()
 	{
 		$aReturn = [];
