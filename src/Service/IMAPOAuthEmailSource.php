@@ -5,6 +5,7 @@ namespace Combodo\iTop\Extension\Service;
 use Combodo\iTop\Extension\Helper\ImapOptionsHelper;
 use Combodo\iTop\Extension\Helper\ProviderHelper;
 use EmailSource;
+use Exception;
 use IssueLog;
 use MessageFromMailbox;
 
@@ -74,10 +75,20 @@ class IMAPOAuthEmailSource extends EmailSource
 	{
 		$iOffsetIndex = 1 + $index;
 		$sUIDL = $this->oStorage->getUniqueId($iOffsetIndex);
-		IssueLog::Debug("IMAPOAuthEmailSource Start GetMessage $iOffsetIndex (UID $sUIDL) for $this->sServer", static::LOG_CHANNEL);
-		$oMail = $this->oStorage->getMessage($iOffsetIndex);
+		IssueLog::Debug(__METHOD__." Start: $iOffsetIndex (UID $sUIDL) for $this->sServer", static::LOG_CHANNEL);
+		try {
+			$oMail = $this->oStorage->getMessage($iOffsetIndex);
+		}
+		catch (Exception $e) {
+			IssueLog::Error(__METHOD__." $iOffsetIndex (UID $sUIDL) for $this->sServer throws an exception", static::LOG_CHANNEL, [
+				'exception.message' => $e->getMessage(),
+				'exception.stack'   => $e->getTraceAsString(),
+			]);
+
+			return null;
+		}
 		$oNewMail = new MessageFromMailbox($sUIDL, $oMail->getHeaders()->toString(), $oMail->getContent());
-		IssueLog::Debug("IMAPOAuthEmailSource End GetMessage $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
+		IssueLog::Debug(__METHOD__." End: $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
 
 		return $oNewMail;
 	}
@@ -99,11 +110,38 @@ class IMAPOAuthEmailSource extends EmailSource
 
 	public function GetListing()
 	{
-		$aReturn = [];
+		$iMessageCount = $this->oStorage->countMessages();
 
-		foreach ($this->oStorage as $iMessageId => $oMessage) {
-			IssueLog::Debug("IMAPOAuthEmailSource GetListing $iMessageId for $this->sServer", static::LOG_CHANNEL);
-			$aReturn[] = ['msg_id' => $iMessageId, 'uidl' => $this->oStorage->getUniqueId($iMessageId)];
+		if ($iMessageCount === 0) {
+			IssueLog::Debug(__METHOD__." for {$this->sServer}: no messages", static::LOG_CHANNEL);
+
+			return [];
+		}
+
+		// Iterates manually over the message iterator
+		// We aren't using foreach as we need to catch each exception ! (N°5633)
+		// We must iterate nevertheless for IMAPOAuthStorage::getUniqueId to work (will return a string during an iteration but an array if not iterating)
+		$aReturn = [];
+		$this->oStorage->rewind();
+		while ($this->oStorage->valid()) {
+			$iMessageId = $this->oStorage->key();
+			IssueLog::Debug(__METHOD__." messageId={$iMessageId} for $this->sServer", static::LOG_CHANNEL);
+			try {
+				$this->oStorage->current();
+				$sMessageUidl = $this->oStorage->getUniqueId($iMessageId);
+				$aReturn[] = ['msg_id' => $iMessageId, 'uidl' => $sMessageUidl];
+			}
+			catch (Exception $e) {
+				IssueLog::Error(__METHOD__." messageId={$iMessageId} for {$this->sServer}: an exception occurred", static::LOG_CHANNEL, [
+					'exception.message' => $e->getMessage(),
+					'exception.stack'   => $e->getTraceAsString(),
+				]);
+				$aReturn[] = ['msg_id' => $iMessageId, 'uidl' => null];
+				continue;
+			}
+			finally {
+				$this->oStorage->next();
+			}
 		}
 
 		return $aReturn;
