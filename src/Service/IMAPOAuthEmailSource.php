@@ -3,6 +3,7 @@
 namespace Combodo\iTop\Extension\Service;
 
 use Combodo\iTop\Extension\Helper\ImapOptionsHelper;
+use Combodo\iTop\Extension\Helper\MessageHelper;
 use Combodo\iTop\Extension\Helper\ProviderHelper;
 use EmailSource;
 use Exception;
@@ -74,13 +75,19 @@ class IMAPOAuthEmailSource extends EmailSource
 	public function GetMessage($index)
 	{
 		$iOffsetIndex = 1 + $index;
+
 		$sUIDL = $this->oStorage->getUniqueId($iOffsetIndex);
-		IssueLog::Debug(__METHOD__." Start: $iOffsetIndex (UID $sUIDL) for $this->sServer", static::LOG_CHANNEL);
+		$sUIDLTrace = $sUIDL;
+		IssueLog::Debug(__METHOD__." Start: $iOffsetIndex (UID $sUIDLTrace) for $this->sServer", static::LOG_CHANNEL);
 		try {
 			$oMail = $this->oStorage->getMessage($iOffsetIndex);
+			$bUseMessageId = static::UseMessageIdAsUid();
+			if ($bUseMessageId) {
+				$sUIDL = MessageHelper::GetMessageId($oMail);
+			}
 		}
 		catch (Exception $e) {
-			IssueLog::Error(__METHOD__." $iOffsetIndex (UID $sUIDL) for $this->sServer throws an exception", static::LOG_CHANNEL, [
+			IssueLog::Error(__METHOD__." $iOffsetIndex (UID $sUIDLTrace) for $this->sServer throws an exception", static::LOG_CHANNEL, [
 				'exception.message' => $e->getMessage(),
 				'exception.stack'   => $e->getTraceAsString(),
 			]);
@@ -122,13 +129,18 @@ class IMAPOAuthEmailSource extends EmailSource
 		// We aren't using foreach as we need to catch each exception ! (N°5633)
 		// We must iterate nevertheless for IMAPOAuthStorage::getUniqueId to work (will return a string during an iteration but an array if not iterating)
 		$aReturn = [];
+		$bUseMessageId = static::UseMessageIdAsUid();
 		$this->oStorage->rewind();
 		while ($this->oStorage->valid()) {
 			$iMessageId = $this->oStorage->key();
 			IssueLog::Debug(__METHOD__." messageId={$iMessageId} for $this->sServer", static::LOG_CHANNEL);
 			try {
-				$this->oStorage->current();
-				$sMessageUidl = $this->oStorage->getUniqueId($iMessageId);
+				$oMessage = $this->oStorage->current();
+				if ($bUseMessageId) {
+					$sMessageUidl = MessageHelper::GetMessageId($oMessage);
+				} else {
+					$sMessageUidl = $this->oStorage->getUniqueId($iMessageId);
+				}
 				$aReturn[] = ['msg_id' => $iMessageId, 'uidl' => $sMessageUidl];
 			}
 			catch (Exception $e) {
