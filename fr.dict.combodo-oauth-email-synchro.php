@@ -5,12 +5,10 @@
  * @copyright   Copyright (C) 2013 XXXXX
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
-
 Dict::Add('FR FR', 'French', 'Français', array(
 	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Title' => 'Créer une boite mail',
 	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Description' => 'Créer une boite mail à synchroniser avec une boite mail distante utilisant cette connexion oAuth 2.0',
 	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:CreateNewMailbox' => 'Créer une nouvelle boite mail',
-
 	'UI:OAuthEmailSynchro:Error:UnknownVendor' => 'Le provider Oauth 2.0 %1$s n\'existe pas',
 ));
 
@@ -25,4 +23,19 @@ Dict::Add('FR FR', 'French', 'Français', array(
 	'Class:MailInboxOAuth/Attribute:oauth_provider+' => '',
 	'Class:MailInboxOAuth/Attribute:oauth_client_id' => 'Client OAuth',
 	'Class:MailInboxOAuth/Attribute:oauth_client_id+' => '',
+));
+
+//
+// Class: MailInboxOAuth
+//
+
+Dict::Add('FR FR', 'French', 'Français', array(
+	'Class:MailInboxOAuth/Attribute:client_id' => 'Client id~~',
+	'Class:MailInboxOAuth/Attribute:client_id+' => '~~',
+	'Class:MailInboxOAuth/Attribute:client_secret' => 'Client secret~~',
+	'Class:MailInboxOAuth/Attribute:client_secret+' => '~~',
+	'Class:MailInboxOAuth/Attribute:access_token' => 'Access token~~',
+	'Class:MailInboxOAuth/Attribute:access_token+' => '~~',
+	'Class:MailInboxOAuth/Attribute:refresh_token' => 'Refresh token~~',
+	'Class:MailInboxOAuth/Attribute:refresh_token+' => '~~',
 ));

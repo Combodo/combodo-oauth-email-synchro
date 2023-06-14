@@ -26,3 +26,18 @@ Dict::Add('EN US', 'English', 'English', array(
 	'Class:MailInboxOAuth/Attribute:oauth_client_id' => 'OAuth client',
 	'Class:MailInboxOAuth/Attribute:oauth_client_id+' => '',
 ));
+
+//
+// Class: MailInboxOAuth
+//
+
+Dict::Add('EN US', 'English', 'English', array(
+	'Class:MailInboxOAuth/Attribute:client_id' => 'Client id',
+	'Class:MailInboxOAuth/Attribute:client_id+' => '',
+	'Class:MailInboxOAuth/Attribute:client_secret' => 'Client secret',
+	'Class:MailInboxOAuth/Attribute:client_secret+' => '',
+	'Class:MailInboxOAuth/Attribute:access_token' => 'Access token',
+	'Class:MailInboxOAuth/Attribute:access_token+' => '',
+	'Class:MailInboxOAuth/Attribute:refresh_token' => 'Refresh token',
+	'Class:MailInboxOAuth/Attribute:refresh_token+' => '',
+));
