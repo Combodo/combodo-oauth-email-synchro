@@ -7,9 +7,9 @@
  */
 Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Title' => 'Mailpostfach erstellen',
-	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Description' => 'Erstellen eines neuen Mailpostfachs zum Abrufen von Mails unter der Nutzung  der Authentifizierung über OAuth',
+	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:Description' => 'Erstellen eines neuen Mailpostfachs zum Abrufen von Mails unter der Nutzung  der Authentifizierung über oAuth',
 	'UI:OAuthEmailSynchro:Wizard:ResultConf:Panel:CreateNewMailbox' => 'Neue Mailbox erstellen',
-	'UI:OAuthEmailSynchro:Error:UnknownVendor' => 'Der OAuth-Provider %1$s existiert nicht',
+	'UI:OAuthEmailSynchro:Error:UnknownVendor' => 'Der oAuth-Provider %1$s existiert nicht',
 ));
 
 //
@@ -30,12 +30,12 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 //
 
 Dict::Add('DE DE', 'German', 'Deutsch', array(
-	'Class:MailInboxOAuth/Attribute:client_id' => 'Client id~~',
-	'Class:MailInboxOAuth/Attribute:client_id+' => '~~',
-	'Class:MailInboxOAuth/Attribute:client_secret' => 'Client secret~~',
-	'Class:MailInboxOAuth/Attribute:client_secret+' => '~~',
-	'Class:MailInboxOAuth/Attribute:access_token' => 'Access token~~',
-	'Class:MailInboxOAuth/Attribute:access_token+' => '~~',
-	'Class:MailInboxOAuth/Attribute:refresh_token' => 'Refresh token~~',
-	'Class:MailInboxOAuth/Attribute:refresh_token+' => '~~',
+	'Class:MailInboxOAuth/Attribute:client_id' => 'Client ID',
+	'Class:MailInboxOAuth/Attribute:client_id+' => 'Eine lange Zeichenfolge, die durch den oAuth2-Provider bereitgestellt wird',
+	'Class:MailInboxOAuth/Attribute:client_secret' => 'Client Secret',
+	'Class:MailInboxOAuth/Attribute:client_secret+' => 'Eine weitere lange Zeichenfolge, die durch den oAuth2-Provider bereitgestellt wird',
+	'Class:MailInboxOAuth/Attribute:access_token' => 'Zugriffstoken',
+	'Class:MailInboxOAuth/Attribute:access_token+' => '',
+	'Class:MailInboxOAuth/Attribute:refresh_token' => 'Erneuerungs-Token',
+	'Class:MailInboxOAuth/Attribute:refresh_token+' => '',
 ));
