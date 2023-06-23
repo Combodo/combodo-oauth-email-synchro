@@ -30,12 +30,12 @@ Dict::Add('FR FR', 'French', 'Français', array(
 //
 
 Dict::Add('FR FR', 'French', 'Français', array(
-	'Class:MailInboxOAuth/Attribute:client_id' => 'Client id~~',
-	'Class:MailInboxOAuth/Attribute:client_id+' => '~~',
-	'Class:MailInboxOAuth/Attribute:client_secret' => 'Client secret~~',
-	'Class:MailInboxOAuth/Attribute:client_secret+' => '~~',
-	'Class:MailInboxOAuth/Attribute:access_token' => 'Access token~~',
-	'Class:MailInboxOAuth/Attribute:access_token+' => '~~',
-	'Class:MailInboxOAuth/Attribute:refresh_token' => 'Refresh token~~',
-	'Class:MailInboxOAuth/Attribute:refresh_token+' => '~~',
+	'Class:MailInboxOAuth/Attribute:client_id' => 'ID Client',
+	'Class:MailInboxOAuth/Attribute:client_id+' => '',
+	'Class:MailInboxOAuth/Attribute:client_secret' => 'Code secret du client',
+	'Class:MailInboxOAuth/Attribute:client_secret+' => '',
+	'Class:MailInboxOAuth/Attribute:access_token' => 'Jeton d\'accès',
+	'Class:MailInboxOAuth/Attribute:access_token+' => '',
+	'Class:MailInboxOAuth/Attribute:refresh_token' => 'Jeton de renouvellement',
+	'Class:MailInboxOAuth/Attribute:refresh_token+' => '',
 ));
