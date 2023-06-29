@@ -50,6 +50,3 @@ SetupWebPage::AddModule(
 		),
 	)
 );
-
-
-?>
