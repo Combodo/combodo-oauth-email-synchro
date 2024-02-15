@@ -17,7 +17,7 @@ Dict::Add('PT BR', 'Brazilian', 'Brazilian', array(
 //
 
 Dict::Add('PT BR', 'Brazilian', 'Brazilian', array(
-	'Class:MailInboxOAuth' => 'MailInboxOAuth~~',
+	'Class:MailInboxOAuth' => 'OAuth 2.0 Mail Inbox~~',
 	'Class:MailInboxOAuth+' => '~~',
 	'Class:MailInboxOAuth/Attribute:oauth_provider' => 'Oauth provider~~',
 	'Class:MailInboxOAuth/Attribute:oauth_provider+' => '~~',

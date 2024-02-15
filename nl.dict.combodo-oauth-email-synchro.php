@@ -17,7 +17,7 @@ Dict::Add('NL NL', 'Dutch', 'Nederlands', array(
 //
 
 Dict::Add('NL NL', 'Dutch', 'Nederlands', array(
-	'Class:MailInboxOAuth' => 'MailInboxOAuth~~',
+	'Class:MailInboxOAuth' => 'OAuth 2.0 Mail Inbox~~',
 	'Class:MailInboxOAuth+' => '~~',
 	'Class:MailInboxOAuth/Attribute:oauth_provider' => 'Oauth provider~~',
 	'Class:MailInboxOAuth/Attribute:oauth_provider+' => '~~',

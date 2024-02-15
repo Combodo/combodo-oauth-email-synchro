@@ -17,7 +17,7 @@ Dict::Add('DA DA', 'Danish', 'Dansk', array(
 //
 
 Dict::Add('DA DA', 'Danish', 'Dansk', array(
-	'Class:MailInboxOAuth' => 'MailInboxOAuth~~',
+	'Class:MailInboxOAuth' => 'OAuth 2.0 Mail Inbox~~',
 	'Class:MailInboxOAuth+' => '~~',
 	'Class:MailInboxOAuth/Attribute:oauth_provider' => 'Oauth provider~~',
 	'Class:MailInboxOAuth/Attribute:oauth_provider+' => '~~',
