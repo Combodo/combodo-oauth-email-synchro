@@ -3,12 +3,13 @@
 namespace Combodo\iTop\Extension\Service;
 
 use Combodo\iTop\Extension\Helper\ImapOptionsHelper;
-use Combodo\iTop\Extension\Helper\MessageHelper;
 use Combodo\iTop\Extension\Helper\ProviderHelper;
 use EmailSource;
 use Exception;
 use IssueLog;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use MessageFromMailbox;
+use Webklex\PHPIMAP\ClientManager;
 
 class IMAPOAuthEmailSource extends EmailSource
 {
@@ -17,10 +18,12 @@ class IMAPOAuthEmailSource extends EmailSource
 	/** LOGIN username @var string */
 	protected $sLogin;
 	protected $sServer;
-	/** * @var IMAPOAuthStorage */
-	protected $oStorage;
 	protected $sTargetFolder;
 	protected $sMailbox;
+	protected $oClientManager;
+	protected $oClient;
+	protected $oFolder;
+	protected $oMessages;
 
 	/**
 	 * Constructor.
@@ -48,15 +51,51 @@ class IMAPOAuthEmailSource extends EmailSource
 		} elseif ($oImapOptions->HasOption('tls')) {
 			$sSSL = 'tls';
 		}
-		$this->oStorage = new IMAPOAuthStorage([
-			'user'     => $sLogin,
-			'host'     => $sServer,
-			'port'     => $iPort,
-			'ssl'      => $sSSL,
-			'folder'   => $sMailbox,
-			'provider' => ProviderHelper::getProviderForIMAP($oMailbox),
-		]);
-		IssueLog::Debug("IMAPOAuthEmailSource End for $this->sServer", static::LOG_CHANNEL);
+
+		$oProvider = ProviderHelper::getProviderForIMAP($oMailbox);
+
+		$sAccessToken = '';
+		try
+		{
+			$sAccessToken = ProviderHelper::GetAccessTokenForProvider($oProvider);
+		}
+		catch (IdentityProviderException $e)
+		{
+			IssueLog::Error('Failed to get IMAP oAuth credentials for incoming mails for provider ' . $oProvider::GetVendorName() , static::LOG_CHANNEL, [
+				'exception.message' => $e->getMessage(),
+				'exception.stack'   => $e->getTraceAsString(),
+			]);
+		}
+
+		if (empty($sAccessToken))
+		{
+			IssueLog::Error('No OAuth token for IMAP for provider '.$oProvider::GetVendorName(), static::LOG_CHANNEL);
+		}
+
+
+
+		$this->oClientManager = new ClientManager(
+			[
+				'accounts' => [
+					'default' => [
+						'host'     => $sServer,
+						'port'     => $iPort,
+						'encryption' => $sSSL,
+						'validate_cert' => true,
+						'username' => $sLogin,
+						'password' => $sAccessToken,
+						'authentication'    => "oauth",
+					],
+				],
+				'default_account' => 'default',
+			]
+		);
+		$oClient = $this->oClientManager->account('default');
+		$oClient->connect();
+
+		//Select the folder
+		$oClient->openFolder($sMailbox);
+		$this->oClient = $oClient;
 
 		// Calls parent with original arguments
 		parent::__construct();
@@ -65,36 +104,39 @@ class IMAPOAuthEmailSource extends EmailSource
 	public function GetMessagesCount()
 	{
 		IssueLog::Debug("IMAPOAuthEmailSource Start GetMessagesCount for $this->sServer", static::LOG_CHANNEL);
-		$iCount = $this->oStorage->countMessages();
+		// Use select as examine opens the the folder as readonly
+		$iCount = $this->GetFolder()->select()['exists'] ?? 0;
 		IssueLog::Debug("IMAPOAuthEmailSource $iCount message(s) found for $this->sServer", static::LOG_CHANNEL);
 
 		return $iCount;
-
 	}
 
 	public function GetMessage($index)
 	{
 		$iOffsetIndex = 1 + $index;
 
-		$sUIDL = $this->oStorage->getUniqueId($iOffsetIndex);
-		$sUIDLTrace = $sUIDL;
-		IssueLog::Debug(__METHOD__." Start: $iOffsetIndex (UID $sUIDLTrace) for $this->sServer", static::LOG_CHANNEL);
+		IssueLog::Debug(__METHOD__." Start: $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
 		try {
-			$oMail = $this->oStorage->getMessage($iOffsetIndex);
-			$bUseMessageId = static::UseMessageIdAsUid();
-			if ($bUseMessageId) {
-				$sUIDL = MessageHelper::GetMessageId($oMail);
+			// Headers only cached collection
+			$oMessages = $this->GetMessages();
+			$oMessage = $oMessages->get($index);
+			if (!$oMessage) {
+				return null;
 			}
+
+			$sUIDL = static::UseMessageIdAsUid() ? $oMessage->getMessageId()->toString() : $oMessage->getSequenceId();
+			// Fetch the message as the body wasn't loaded
+			$sBody = $oMessage->getTextBody();
 		}
 		catch (Exception $e) {
-			IssueLog::Error(__METHOD__." $iOffsetIndex (UID $sUIDLTrace) for $this->sServer throws an exception", static::LOG_CHANNEL, [
+			IssueLog::Error(__METHOD__." $iOffsetIndex for $this->sServer throws an exception", static::LOG_CHANNEL, [
 				'exception.message' => $e->getMessage(),
 				'exception.stack'   => $e->getTraceAsString(),
 			]);
 
 			return null;
 		}
-		$oNewMail = new MessageFromMailbox($sUIDL, $oMail->getHeaders()->toString(), $oMail->getContent());
+		$oNewMail = new MessageFromMailbox($sUIDL, $oMessage->getHeader()->raw, $sBody);
 		IssueLog::Debug(__METHOD__." End: $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
 
 		return $oNewMail;
@@ -102,7 +144,26 @@ class IMAPOAuthEmailSource extends EmailSource
 
 	public function DeleteMessage($index)
 	{
-		$this->oStorage->removeMessage(1 + $index);
+		$iOffsetIndex = 1 + $index;
+
+		IssueLog::Debug(__METHOD__." Start: $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
+		try {
+			$oMessages = $this->GetMessages(); // header-only cached collection
+			$oMessage = $oMessages->get($index);
+
+			if (!$oMessage) {
+				return null;
+			}
+
+			$oMessage->delete(true);
+		} catch (Exception $e) {
+			IssueLog::Error(__METHOD__." $iOffsetIndex for $this->sServer throws an exception", static::LOG_CHANNEL, [
+				'exception.message' => $e->getMessage(),
+				'exception.stack'   => $e->getTraceAsString(),
+			]);
+
+			return null;
+		}
 	}
 
 	public function GetName()
@@ -117,46 +178,39 @@ class IMAPOAuthEmailSource extends EmailSource
 
 	public function GetListing()
 	{
-		$iMessageCount = $this->oStorage->countMessages();
 
-		if ($iMessageCount === 0) {
-			IssueLog::Debug(__METHOD__." for {$this->sServer}: no messages", static::LOG_CHANNEL);
-
-			return [];
-		}
-
-		// Iterates manually over the message iterator
-		// We aren't using foreach as we need to catch each exception ! (N°5633)
-		// We must iterate nevertheless for IMAPOAuthStorage::getUniqueId to work (will return a string during an iteration but an array if not iterating)
 		$aReturn = [];
-		$bUseMessageId = static::UseMessageIdAsUid();
-		$this->oStorage->rewind();
-		while ($this->oStorage->valid()) {
-			$iMessageId = $this->oStorage->key();
-			IssueLog::Debug(__METHOD__." messageId={$iMessageId} for $this->sServer", static::LOG_CHANNEL);
-			try {
-				$oMessage = $this->oStorage->current();
-				if ($bUseMessageId) {
-					$sMessageUidl = MessageHelper::GetMessageId($oMessage);
-				} else {
-					$sMessageUidl = $this->oStorage->getUniqueId($iMessageId);
-				}
-				$aReturn[] = ['msg_id' => $iMessageId, 'uidl' => $sMessageUidl];
-			}
-			catch (Exception $e) {
-				IssueLog::Error(__METHOD__." messageId={$iMessageId} for {$this->sServer}: an exception occurred", static::LOG_CHANNEL, [
-					'exception.message' => $e->getMessage(),
-					'exception.stack'   => $e->getTraceAsString(),
-				]);
-				$aReturn[] = ['msg_id' => $iMessageId, 'uidl' => null];
-				continue;
-			}
-			finally {
-				$this->oStorage->next();
-			}
+		foreach ($this->GetMessages() as $oMessage) {
+			$aReturn[] = [
+				'msg_id' => $oMessage->getMsgn(),
+				'uidl'   => static::UseMessageIdAsUid() ? $oMessage->getMessageId()->toString() : $oMessage->getSequenceId(),
+			];
 		}
-
 		return $aReturn;
+	}
+
+	public function GetMessages() {
+		if ($this->oMessages === null) {
+			IssueLog::Debug("Start loading messages collection for $this->sServer ", static::LOG_CHANNEL);
+
+			// Use the query API and disable body/attachment/flags for the listing
+			$this->oMessages = $this->GetFolder()
+				->messages()
+				->all()
+				->setFetchBody(false)
+				->leaveUnread()
+				->get();
+
+			IssueLog::Debug("Loaded messages collection for $this->sServer ", static::LOG_CHANNEL);
+		}
+		return $this->oMessages;
+	}
+
+	public function GetFolder() {
+		if( $this->oFolder === null ) {
+			$this->oFolder = $this->oClient->getFolderByPath($this->sMailbox);
+		}
+		return $this->oFolder;
 	}
 
 	/**
@@ -166,14 +220,34 @@ class IMAPOAuthEmailSource extends EmailSource
 	 */
 	public function MoveMessage($index)
 	{
-		$this->oStorage->moveMessage(1 + $index, $this->sTargetFolder);
+		$iOffsetIndex = 1 + $index;
+		IssueLog::Debug(__METHOD__." Start: $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
+		try {
+			$oMessages = $this->GetMessages(); // header-only cached collection
+			$oMessage = $oMessages->get($index);
+
+			if (!$oMessage) {
+				return false;
+			}
+		}
+		catch (Exception $e) {
+			IssueLog::Error(__METHOD__." $iOffsetIndex for $this->sServer throws an exception", static::LOG_CHANNEL, [
+				'exception.message' => $e->getMessage(),
+				'exception.stack'   => $e->getTraceAsString(),
+			]);
+
+			return false;
+		}
+
+		$oMessage->move($this->sTargetFolder);
+		IssueLog::Debug(__METHOD__." End: $iOffsetIndex for $this->sServer", static::LOG_CHANNEL);
 
 		return true;
 	}
 
 	public function Disconnect()
 	{
-		$this->oStorage->close();
+		$this->oClient->disconnect();
 	}
 
 	public function GetMailbox()
