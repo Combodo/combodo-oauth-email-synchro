@@ -2,7 +2,6 @@
 
 namespace Illuminate\Support\Traits;
 
-use BackedEnum;
 use CachingIterator;
 use Closure;
 use Exception;
@@ -12,47 +11,48 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Enumerable;
 use Illuminate\Support\HigherOrderCollectionProxy;
+use InvalidArgumentException;
 use JsonSerializable;
+use Symfony\Component\VarDumper\VarDumper;
+use Traversable;
 use UnexpectedValueException;
 use UnitEnum;
-
-use function Illuminate\Support\enum_value;
+use WeakMap;
 
 /**
  * @template TKey of array-key
  *
  * @template-covariant TValue
  *
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $average
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $avg
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $contains
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $doesntContain
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $each
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $every
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $filter
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $first
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $flatMap
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $groupBy
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $keyBy
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $last
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $map
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $max
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $min
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $partition
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $percentage
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $reject
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $skipUntil
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $skipWhile
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $some
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $sortBy
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $sortByDesc
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $sum
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $takeUntil
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $takeWhile
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $unique
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $unless
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $until
- * @property-read HigherOrderCollectionProxy<TKey, TValue> $when
+ * @property-read HigherOrderCollectionProxy $average
+ * @property-read HigherOrderCollectionProxy $avg
+ * @property-read HigherOrderCollectionProxy $contains
+ * @property-read HigherOrderCollectionProxy $doesntContain
+ * @property-read HigherOrderCollectionProxy $each
+ * @property-read HigherOrderCollectionProxy $every
+ * @property-read HigherOrderCollectionProxy $filter
+ * @property-read HigherOrderCollectionProxy $first
+ * @property-read HigherOrderCollectionProxy $flatMap
+ * @property-read HigherOrderCollectionProxy $groupBy
+ * @property-read HigherOrderCollectionProxy $keyBy
+ * @property-read HigherOrderCollectionProxy $map
+ * @property-read HigherOrderCollectionProxy $max
+ * @property-read HigherOrderCollectionProxy $min
+ * @property-read HigherOrderCollectionProxy $partition
+ * @property-read HigherOrderCollectionProxy $percentage
+ * @property-read HigherOrderCollectionProxy $reject
+ * @property-read HigherOrderCollectionProxy $skipUntil
+ * @property-read HigherOrderCollectionProxy $skipWhile
+ * @property-read HigherOrderCollectionProxy $some
+ * @property-read HigherOrderCollectionProxy $sortBy
+ * @property-read HigherOrderCollectionProxy $sortByDesc
+ * @property-read HigherOrderCollectionProxy $sum
+ * @property-read HigherOrderCollectionProxy $takeUntil
+ * @property-read HigherOrderCollectionProxy $takeWhile
+ * @property-read HigherOrderCollectionProxy $unique
+ * @property-read HigherOrderCollectionProxy $unless
+ * @property-read HigherOrderCollectionProxy $until
+ * @property-read HigherOrderCollectionProxy $when
  */
 trait EnumeratesValues
 {
@@ -82,7 +82,6 @@ trait EnumeratesValues
         'flatMap',
         'groupBy',
         'keyBy',
-        'last',
         'map',
         'max',
         'min',
@@ -177,41 +176,6 @@ trait EnumeratesValues
     }
 
     /**
-     * Create a new collection by decoding a JSON string.
-     *
-     * @param  string  $json
-     * @param  int  $depth
-     * @param  int  $flags
-     * @return static<TKey, TValue>
-     */
-    public static function fromJson($json, $depth = 512, $flags = 0)
-    {
-        return new static(json_decode($json, true, $depth, $flags));
-    }
-
-    /**
-     * Get the average value of a given key.
-     *
-     * @param  (callable(TValue): float|int)|string|null  $callback
-     * @return float|int|null
-     */
-    public function avg($callback = null)
-    {
-        $callback = $this->valueRetriever($callback);
-
-        $reduced = $this->reduce(static function (&$reduce, $value) use ($callback) {
-            if (! is_null($resolved = $callback($value))) {
-                $reduce[0] += $resolved;
-                $reduce[1]++;
-            }
-
-            return $reduce;
-        }, [0, 0]);
-
-        return $reduced[1] ? $reduced[0] / $reduced[1] : null;
-    }
-
-    /**
      * Alias for the "avg" method.
      *
      * @param  (callable(TValue): float|int)|string|null  $callback
@@ -236,25 +200,30 @@ trait EnumeratesValues
     }
 
     /**
-     * Dump the given arguments and terminate execution.
+     * Dump the items and end the script.
      *
      * @param  mixed  ...$args
      * @return never
      */
     public function dd(...$args)
     {
-        dd($this->all(), ...$args);
+        $this->dump(...$args);
+
+        exit(1);
     }
 
     /**
      * Dump the items.
      *
-     * @param  mixed  ...$args
      * @return $this
      */
-    public function dump(...$args)
+    public function dump()
     {
-        dump($this->all(), ...$args);
+        (new Collection(func_get_args()))
+            ->push($this->all())
+            ->each(function ($item) {
+                VarDumper::dump($item);
+            });
 
         return $this;
     }
@@ -352,7 +321,7 @@ trait EnumeratesValues
      *
      * @template TEnsureOfType
      *
-     * @param  class-string<TEnsureOfType>|array<array-key, class-string<TEnsureOfType>>|'string'|'int'|'float'|'bool'|'array'|'null'  $type
+     * @param  class-string<TEnsureOfType>|array<array-key, class-string<TEnsureOfType>>  $type
      * @return static<TKey, TEnsureOfType>
      *
      * @throws \UnexpectedValueException
@@ -361,7 +330,7 @@ trait EnumeratesValues
     {
         $allowedTypes = is_array($type) ? $type : [$type];
 
-        return $this->each(function ($item, $index) use ($allowedTypes) {
+        return $this->each(function ($item) use ($allowedTypes) {
             $itemType = get_debug_type($item);
 
             foreach ($allowedTypes as $allowedType) {
@@ -371,19 +340,13 @@ trait EnumeratesValues
             }
 
             throw new UnexpectedValueException(
-                sprintf("Collection should only include [%s] items, but '%s' found at position %d.", implode(', ', $allowedTypes), $itemType, $index)
+                sprintf("Collection should only include [%s] items, but '%s' found.", implode(', ', $allowedTypes), $itemType)
             );
         });
     }
 
     /**
      * Determine if the collection is not empty.
-     *
-     * @phpstan-assert-if-true TValue $this->first()
-     * @phpstan-assert-if-true TValue $this->last()
-     *
-     * @phpstan-assert-if-false null $this->first()
-     * @phpstan-assert-if-false null $this->last()
      *
      * @return bool
      */
@@ -424,7 +387,7 @@ trait EnumeratesValues
     {
         $groups = $this->mapToDictionary($callback);
 
-        return $groups->map($this->make(...));
+        return $groups->map([$this, 'make']);
     }
 
     /**
@@ -451,10 +414,6 @@ trait EnumeratesValues
      */
     public function mapInto($class)
     {
-        if (is_subclass_of($class, BackedEnum::class)) {
-            return $this->map(fn ($value, $key) => $class::from($value));
-        }
-
         return $this->map(fn ($value, $key) => new $class($value, $key));
     }
 
@@ -469,7 +428,7 @@ trait EnumeratesValues
         $callback = $this->valueRetriever($callback);
 
         return $this->map(fn ($value) => $callback($value))
-            ->reject(fn ($value) => is_null($value))
+            ->filter(fn ($value) => ! is_null($value))
             ->reduce(fn ($result, $value) => is_null($result) || $value < $result ? $value : $result);
     }
 
@@ -483,7 +442,7 @@ trait EnumeratesValues
     {
         $callback = $this->valueRetriever($callback);
 
-        return $this->reject(fn ($value) => is_null($value))->reduce(function ($result, $item) use ($callback) {
+        return $this->filter(fn ($value) => ! is_null($value))->reduce(function ($result, $item) use ($callback) {
             $value = $callback($item);
 
             return is_null($result) || $value > $result ? $value : $result;
@@ -508,17 +467,26 @@ trait EnumeratesValues
      * Partition the collection into two arrays using the given callback or key.
      *
      * @param  (callable(TValue, TKey): bool)|TValue|string  $key
-     * @param  mixed  $operator
-     * @param  mixed  $value
+     * @param  TValue|string|null  $operator
+     * @param  TValue|null  $value
      * @return static<int<0, 1>, static<TKey, TValue>>
      */
     public function partition($key, $operator = null, $value = null)
     {
-        $callback = func_num_args() === 1
-            ? $this->valueRetriever($key)
-            : $this->operatorForWhere(...func_get_args());
+        $passed = [];
+        $failed = [];
 
-        [$passed, $failed] = Arr::partition($this->getIterator(), $callback);
+        $callback = func_num_args() === 1
+                ? $this->valueRetriever($key)
+                : $this->operatorForWhere(...func_get_args());
+
+        foreach ($this as $key => $item) {
+            if ($callback($item, $key)) {
+                $passed[$key] = $item;
+            } else {
+                $failed[$key] = $item;
+            }
+        }
 
         return new static([new static($passed), new static($failed)]);
     }
@@ -545,10 +513,8 @@ trait EnumeratesValues
     /**
      * Get the sum of the given values.
      *
-     * @template TReturnType
-     *
-     * @param  (callable(TValue): TReturnType)|string|null  $callback
-     * @return ($callback is callable ? TReturnType : mixed)
+     * @param  (callable(TValue): mixed)|string|null  $callback
+     * @return mixed
      */
     public function sum($callback = null)
     {
@@ -801,7 +767,7 @@ trait EnumeratesValues
      */
     public function pipeThrough($callbacks)
     {
-        return (new Collection($callbacks))->reduce(
+        return Collection::make($callbacks)->reduce(
             fn ($carry, $callback) => $callback($carry),
             $this,
         );
@@ -985,16 +951,6 @@ trait EnumeratesValues
     }
 
     /**
-     * Get the collection of items as pretty print formatted JSON.
-     *
-     * @return string
-     */
-    public function toPrettyJson()
-    {
-        return $this->toJson(JSON_PRETTY_PRINT);
-    }
-
-    /**
      * Get a CachingIterator instance.
      *
      * @param  int  $flags
@@ -1013,8 +969,8 @@ trait EnumeratesValues
     public function __toString()
     {
         return $this->escapeWhenCastingToString
-            ? e($this->toJson())
-            : $this->toJson();
+                    ? e($this->toJson())
+                    : $this->toJson();
     }
 
     /**
@@ -1066,9 +1022,20 @@ trait EnumeratesValues
      */
     protected function getArrayableItems($items)
     {
-        return is_null($items) || is_scalar($items) || $items instanceof UnitEnum
-            ? Arr::wrap($items)
-            : Arr::from($items);
+        if (is_array($items)) {
+            return $items;
+        }
+
+        return match (true) {
+            $items instanceof WeakMap => throw new InvalidArgumentException('Collections can not be created using instances of WeakMap.'),
+            $items instanceof Enumerable => $items->all(),
+            $items instanceof Arrayable => $items->toArray(),
+            $items instanceof Traversable => iterator_to_array($items),
+            $items instanceof Jsonable => json_decode($items->toJson(), true),
+            $items instanceof JsonSerializable => (array) $items->jsonSerialize(),
+            $items instanceof UnitEnum => [$items],
+            default => (array) $items,
+        };
     }
 
     /**
@@ -1098,15 +1065,10 @@ trait EnumeratesValues
         }
 
         return function ($item) use ($key, $operator, $value) {
-            $retrieved = enum_value(data_get($item, $key));
-            $value = enum_value($value);
+            $retrieved = data_get($item, $key);
 
             $strings = array_filter([$retrieved, $value], function ($value) {
-                return match (true) {
-                    is_string($value) => true,
-                    $value instanceof \Stringable => true,
-                    default => false,
-                };
+                return is_string($value) || (is_object($value) && method_exists($value, '__toString'));
             });
 
             if (count($strings) < 2 && count(array_filter([$retrieved, $value], 'is_object')) == 1) {

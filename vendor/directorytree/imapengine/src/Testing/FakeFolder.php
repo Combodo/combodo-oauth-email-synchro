@@ -89,7 +89,7 @@ class FakeFolder implements FolderInterface
     /**
      * {@inheritDoc}
      */
-    public function idle(callable $callback, ?callable $query = null, int $timeout = 300): void
+    public function idle(callable $callback, ?callable $query = null, callable|int $timeout = 300): void
     {
         foreach ($this->messages as $message) {
             $callback($message);
@@ -134,6 +134,25 @@ class FakeFolder implements FolderInterface
     public function expunge(): array
     {
         return [];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function quota(): array
+    {
+        return [
+            $this->path => [
+                'STORAGE' => [
+                    'usage' => 0,
+                    'limit' => 0,
+                ],
+                'MESSAGE' => [
+                    'usage' => 0,
+                    'limit' => 0,
+                ],
+            ],
+        ];
     }
 
     /**

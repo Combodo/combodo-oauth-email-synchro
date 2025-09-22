@@ -2,6 +2,7 @@
 
 namespace DirectoryTree\ImapEngine;
 
+use Closure;
 use DirectoryTree\ImapEngine\Connection\ImapQueryBuilder;
 use DirectoryTree\ImapEngine\Connection\Responses\UntaggedResponse;
 use DirectoryTree\ImapEngine\Enums\ImapFetchIdentifier;
@@ -92,10 +93,15 @@ class Folder implements Arrayable, FolderInterface, JsonSerializable
     /**
      * {@inheritDoc}
      */
-    public function idle(callable $callback, ?callable $query = null, int $timeout = 300): void
+    public function idle(callable $callback, ?callable $query = null, callable|int $timeout = 300): void
     {
         if (! in_array('IDLE', $this->mailbox->capabilities())) {
             throw new ImapCapabilityException('Unable to IDLE. IMAP server does not support IDLE capability.');
+        }
+
+        // Normalize timeout into a closure.
+        if (is_callable($timeout) && ! $timeout instanceof Closure) {
+            $timeout = $timeout(...);
         }
 
         // The message query to use when fetching messages.
@@ -147,6 +153,37 @@ class Folder implements Arrayable, FolderInterface, JsonSerializable
     public function select(bool $force = false): void
     {
         $this->mailbox->select($this, $force);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function quota(): array
+    {
+        if (! in_array('QUOTA', $this->mailbox->capabilities())) {
+            throw new ImapCapabilityException(
+                'Unable to fetch mailbox quotas. IMAP server does not support QUOTA capability.'
+            );
+        }
+
+        $responses = $this->mailbox->connection()->quotaRoot($this->path);
+
+        $values = [];
+
+        foreach ($responses as $response) {
+            $resource = $response->tokenAt(2);
+
+            $tokens = $response->tokenAt(3)->tokens();
+
+            for ($i = 0; $i + 2 < count($tokens); $i += 3) {
+                $values[$resource->value][$tokens[$i]->value] = [
+                    'usage' => (int) $tokens[$i + 1]->value,
+                    'limit' => (int) $tokens[$i + 2]->value,
+                ];
+            }
+        }
+
+        return $values;
     }
 
     /**

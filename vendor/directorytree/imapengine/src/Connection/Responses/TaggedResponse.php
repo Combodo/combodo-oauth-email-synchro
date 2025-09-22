@@ -3,13 +3,15 @@
 namespace DirectoryTree\ImapEngine\Connection\Responses;
 
 use DirectoryTree\ImapEngine\Connection\Tokens\Atom;
+use DirectoryTree\ImapEngine\Connection\Tokens\Number;
+use DirectoryTree\ImapEngine\Connection\Tokens\Token;
 
 class TaggedResponse extends Response
 {
     /**
      * Get the response tag.
      */
-    public function tag(): Atom
+    public function tag(): Atom|Number
     {
         return $this->tokens[0];
     }
@@ -25,7 +27,7 @@ class TaggedResponse extends Response
     /**
      * Get the response data tokens.
      *
-     * @return Atom[]
+     * @return Token[]
      */
     public function data(): array
     {
@@ -37,7 +39,7 @@ class TaggedResponse extends Response
      */
     public function successful(): bool
     {
-        return $this->status()->value === 'OK';
+        return strtoupper($this->status()->value) === 'OK';
     }
 
     /**
@@ -45,6 +47,6 @@ class TaggedResponse extends Response
      */
     public function failed(): bool
     {
-        return in_array($this->status()->value, ['NO', 'BAD']);
+        return in_array(strtoupper($this->status()->value), ['NO', 'BAD']);
     }
 }

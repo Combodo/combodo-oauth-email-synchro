@@ -175,6 +175,15 @@ interface ConnectionInterface
     public function flags(int|array $ids): ResponseCollection;
 
     /**
+     * Send a "FETCH" command.
+     *
+     * Fetch one or more items for one or more messages.
+     *
+     * @see https://datatracker.ietf.org/doc/html/rfc9051#name-fetch-command
+     */
+    public function fetch(array|string $items, array|int $from, mixed $to = null, ImapFetchIdentifier $identifier = ImapFetchIdentifier::Uid): ResponseCollection;
+
+    /**
      * Send a "RFC822.SIZE" command.
      *
      * Fetch message sizes.
@@ -182,6 +191,11 @@ interface ConnectionInterface
      * @see https://datatracker.ietf.org/doc/html/rfc9051#section-6.4.5-9.21
      */
     public function size(int|array $ids): ResponseCollection;
+
+    /**
+     * Send an IMAP command.
+     */
+    public function send(string $name, array $tokens = [], ?string &$tag = null): void;
 
     /**
      * Send a "SELECT" command.
@@ -299,4 +313,22 @@ interface ConnectionInterface
      * @see https://datatracker.ietf.org/doc/html/rfc9051#name-unsubscribe-command
      */
     public function unsubscribe(string $folder): TaggedResponse;
+
+    /**
+     * Send a "GETQUOTA" command.
+     *
+     * Retrieve quota information about a specific quota root.
+     *
+     * @see https://datatracker.ietf.org/doc/html/rfc9208#name-getquota
+     */
+    public function quota(string $root): UntaggedResponse;
+
+    /**
+     * Send a "GETQUOTAROOT" command.
+     *
+     * Retrieve quota root information about a mailbox.
+     *
+     * @see https://datatracker.ietf.org/doc/html/rfc9208#name-getquotaroot
+     */
+    public function quotaRoot(string $mailbox): ResponseCollection;
 }

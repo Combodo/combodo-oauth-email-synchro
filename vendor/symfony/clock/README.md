@@ -6,8 +6,8 @@ Symfony Clock decouples applications from the system clock.
 Getting Started
 ---------------
 
-```bash
-composer require symfony/clock
+```
+$ composer require symfony/clock
 ```
 
 ```php

@@ -13,7 +13,7 @@ if (! function_exists('collect')) {
      * @param  \Illuminate\Contracts\Support\Arrayable<TKey, TValue>|iterable<TKey, TValue>|null  $value
      * @return \Illuminate\Support\Collection<TKey, TValue>
      */
-    function collect($value = []): Collection
+    function collect($value = [])
     {
         return new Collection($value);
     }
@@ -73,15 +73,6 @@ if (! function_exists('data_get')) {
 
                 return in_array('*', $key) ? Arr::collapse($result) : $result;
             }
-
-            $segment = match ($segment) {
-                '\*' => '*',
-                '\{first}' => '{first}',
-                '{first}' => array_key_first(Arr::from($target)),
-                '\{last}' => '{last}',
-                '{last}' => array_key_last(Arr::from($target)),
-                default => $segment,
-            };
 
             if (Arr::accessible($target) && Arr::exists($target, $segment)) {
                 $target = $target[$segment];
@@ -203,7 +194,7 @@ if (! function_exists('head')) {
      */
     function head($array)
     {
-        return empty($array) ? false : array_first($array);
+        return reset($array);
     }
 }
 
@@ -216,7 +207,7 @@ if (! function_exists('last')) {
      */
     function last($array)
     {
-        return empty($array) ? false : array_last($array);
+        return end($array);
     }
 }
 
@@ -224,36 +215,12 @@ if (! function_exists('value')) {
     /**
      * Return the default value of the given value.
      *
-     * @template TValue
-     * @template TArgs
-     *
-     * @param  TValue|\Closure(TArgs): TValue  $value
-     * @param  TArgs  ...$args
-     * @return TValue
+     * @param  mixed  $value
+     * @param  mixed  ...$args
+     * @return mixed
      */
     function value($value, ...$args)
     {
         return $value instanceof Closure ? $value(...$args) : $value;
-    }
-}
-
-if (! function_exists('when')) {
-    /**
-     * Return a value if the given condition is true.
-     *
-     * @param  mixed  $condition
-     * @param  \Closure|mixed  $value
-     * @param  \Closure|mixed  $default
-     * @return mixed
-     */
-    function when($condition, $value, $default = null)
-    {
-        $condition = $condition instanceof Closure ? $condition() : $condition;
-
-        if ($condition) {
-            return value($value, $condition);
-        }
-
-        return value($default, $condition);
     }
 }
