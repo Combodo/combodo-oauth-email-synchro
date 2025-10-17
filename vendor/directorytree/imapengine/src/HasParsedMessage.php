@@ -6,13 +6,14 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use DirectoryTree\ImapEngine\Exceptions\RuntimeException;
 use GuzzleHttp\Psr7\Utils;
+use ZBateson\MailMimeParser\Header\DateHeader;
 use ZBateson\MailMimeParser\Header\HeaderConsts;
 use ZBateson\MailMimeParser\Header\IHeader;
 use ZBateson\MailMimeParser\Header\IHeaderPart;
 use ZBateson\MailMimeParser\Header\Part\AddressPart;
 use ZBateson\MailMimeParser\Header\Part\ContainerPart;
 use ZBateson\MailMimeParser\Header\Part\NameValuePart;
-use ZBateson\MailMimeParser\Message as MailMimeMessage;
+use ZBateson\MailMimeParser\IMessage;
 use ZBateson\MailMimeParser\Message\IMessagePart;
 
 trait HasParsedMessage
@@ -20,15 +21,19 @@ trait HasParsedMessage
     /**
      * The parsed message.
      */
-    protected ?MailMimeMessage $parsed = null;
+    protected ?IMessage $parsed = null;
 
     /**
      * Get the message date and time.
      */
     public function date(): ?CarbonInterface
     {
-        if ($date = $this->header(HeaderConsts::DATE)?->getDateTime()) {
-            return Carbon::instance($date);
+        if (! $header = $this->header(HeaderConsts::DATE)) {
+            return null;
+        }
+
+        if ($header instanceof DateHeader) {
+            return Carbon::instance($header->getDateTime());
         }
 
         return null;
@@ -75,11 +80,19 @@ trait HasParsedMessage
     }
 
     /**
-     * Get the IN-REPLY-TO address.
+     * Get the IN-REPLY-TO message identifier(s).
+     *
+     * @return string[]
      */
-    public function inReplyTo(): ?Address
+    public function inReplyTo(): array
     {
-        return head($this->addresses(HeaderConsts::IN_REPLY_TO)) ?: null;
+        $parts = $this->header(HeaderConsts::IN_REPLY_TO)?->getParts() ?? [];
+
+        $values = array_map(function (IHeaderPart $part) {
+            return $part->getValue();
+        }, $parts);
+
+        return array_values(array_filter($values));
     }
 
     /**
@@ -131,6 +144,7 @@ trait HasParsedMessage
                     $part->getFilename(),
                     $part->getContentId(),
                     $part->getContentType(),
+                    $part->getContentDisposition(),
                     $part->getBinaryContentStream() ?? Utils::streamFor(''),
                 );
             }
@@ -219,7 +233,7 @@ trait HasParsedMessage
     /**
      * Parse the message into a MailMimeMessage instance.
      */
-    public function parse(): MailMimeMessage
+    public function parse(): IMessage
     {
         if ($this->isEmpty()) {
             throw new RuntimeException('Cannot parse an empty message');

@@ -62,6 +62,11 @@ interface MessageQueryInterface
     public function isFetchingHeaders(): bool;
 
     /**
+     * Determine if the size of messages is being fetched.
+     */
+    public function isFetchingSize(): bool;
+
+    /**
      * Fetch the flags of messages.
      */
     public function withFlags(): MessageQueryInterface;
@@ -77,6 +82,11 @@ interface MessageQueryInterface
     public function withHeaders(): MessageQueryInterface;
 
     /**
+     * Fetch the size of messages.
+     */
+    public function withSize(): MessageQueryInterface;
+
+    /**
      * Don't fetch the body of messages.
      */
     public function withoutBody(): MessageQueryInterface;
@@ -90,6 +100,11 @@ interface MessageQueryInterface
      * Don't fetch the flags of messages.
      */
     public function withoutFlags(): MessageQueryInterface;
+
+    /**
+     * Don't fetch the size of messages.
+     */
+    public function withoutSize(): MessageQueryInterface;
 
     /**
      * Set the fetch order.
@@ -128,15 +143,11 @@ interface MessageQueryInterface
 
     /**
      * Get the first message in the resulting collection.
-     *
-     * @return \DirectoryTree\ImapEngine\Message|null
      */
     public function first(): ?MessageInterface;
 
     /**
      * Get the first message in the resulting collection or throw an exception.
-     *
-     * @return \DirectoryTree\ImapEngine\Message
      */
     public function firstOrFail(): MessageInterface;
 
@@ -167,15 +178,11 @@ interface MessageQueryInterface
 
     /**
      * Find a message by the given identifier type or throw an exception.
-     *
-     * @return \DirectoryTree\ImapEngine\Message
      */
     public function findOrFail(int $id, ImapFetchIdentifier $identifier = ImapFetchIdentifier::Uid): MessageInterface;
 
     /**
      * Find a message by the given identifier type.
-     *
-     * @return \DirectoryTree\ImapEngine\Message|null
      */
     public function find(int $id, ImapFetchIdentifier $identifier = ImapFetchIdentifier::Uid): ?MessageInterface;
 

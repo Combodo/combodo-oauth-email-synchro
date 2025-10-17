@@ -24,6 +24,7 @@ use DirectoryTree\ImapEngine\Support\Str;
 use Exception;
 use Generator;
 use LogicException;
+use Throwable;
 
 class ImapConnection implements ConnectionInterface
 {
@@ -122,6 +123,8 @@ class ImapConnection implements ConnectionInterface
 
     /**
      * Get the default socket options for the given transport.
+     *
+     * @param  'ssl'|'tls'|'starttls'|'tcp'  $transport
      */
     protected function getDefaultSocketOptions(string $transport, array $proxy = [], bool $validateCert = true): array
     {
@@ -595,6 +598,8 @@ class ImapConnection implements ConnectionInterface
 
     /**
      * Send an IMAP command.
+     *
+     * @param-out string $tag
      */
     public function send(string $name, array $tokens = [], ?string &$tag = null): void
     {
@@ -701,7 +706,8 @@ class ImapConnection implements ConnectionInterface
      */
     protected function assertTaggedResponse(string $tag, ?callable $exception = null): TaggedResponse
     {
-        return $this->assertNextResponse(
+        /** @var TaggedResponse $response */
+        $response = $this->assertNextResponse(
             fn (Response $response) => (
                 $response instanceof TaggedResponse && $response->tag()->is($tag)
             ),
@@ -712,6 +718,8 @@ class ImapConnection implements ConnectionInterface
                 ImapCommandException::make($this->result->command(), $response)
             ),
         );
+
+        return $response;
     }
 
     /**
@@ -720,7 +728,11 @@ class ImapConnection implements ConnectionInterface
      * @template T of Response
      *
      * @param  callable(Response): bool  $filter
+     * @param  callable(T): bool  $assertion
+     * @param  callable(T): Throwable  $exception
      * @return T
+     *
+     * @throws ImapResponseException
      */
     protected function assertNextResponse(callable $filter, callable $assertion, callable $exception): Response
     {
@@ -740,10 +752,10 @@ class ImapConnection implements ConnectionInterface
      *
      * @template T of Response
      *
-     * @param  callable(Response): bool  $filter
-     * @return T
+     * @param  callable(T): bool  $filter
+     * @return T|null
      */
-    protected function nextResponse(callable $filter): Response
+    protected function nextResponse(callable $filter): ?Response
     {
         if (! $this->parser) {
             throw new LogicException('No parser instance set');
@@ -761,7 +773,7 @@ class ImapConnection implements ConnectionInterface
             }
         }
 
-        throw new ImapResponseException('No matching response found');
+        return null;
     }
 
     /**

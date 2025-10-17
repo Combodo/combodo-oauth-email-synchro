@@ -3,13 +3,16 @@
 namespace DirectoryTree\ImapEngine\Collections;
 
 use DirectoryTree\ImapEngine\Connection\Responses\ContinuationResponse;
-use DirectoryTree\ImapEngine\Connection\Responses\Response;
 use DirectoryTree\ImapEngine\Connection\Responses\TaggedResponse;
 use DirectoryTree\ImapEngine\Connection\Responses\UntaggedResponse;
 use Illuminate\Support\Collection;
 
 /**
- * @template-extends Collection<array-key, Response>
+ * @template TKey of array-key
+ *
+ * @template-covariant TValue
+ *
+ * @extends Collection<array-key, TValue>
  */
 class ResponseCollection extends Collection
 {

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Closure;
 use DirectoryTree\ImapEngine\Connection\Responses\UntaggedResponse;
+use DirectoryTree\ImapEngine\Connection\Tokens\Atom;
 use DirectoryTree\ImapEngine\Exceptions\Exception;
 use DirectoryTree\ImapEngine\Exceptions\ImapConnectionClosedException;
 use DirectoryTree\ImapEngine\Exceptions\ImapConnectionTimedOutException;
@@ -59,7 +60,11 @@ class Idle
                 continue;
             }
 
-            if ($response->tokenAt(2)?->is('EXISTS')) {
+            if (! $token = $response->tokenAt(2)) {
+                continue;
+            }
+
+            if ($token instanceof Atom && $token->is('EXISTS')) {
                 $msgn = (int) $response->tokenAt(1)->value;
 
                 $callback($msgn);

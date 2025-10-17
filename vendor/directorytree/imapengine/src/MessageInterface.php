@@ -5,6 +5,7 @@ namespace DirectoryTree\ImapEngine;
 use Carbon\CarbonInterface;
 use Stringable;
 use ZBateson\MailMimeParser\Header\IHeader;
+use ZBateson\MailMimeParser\IMessage;
 use ZBateson\MailMimeParser\Message as MailMimeMessage;
 
 interface MessageInterface extends FlaggableInterface, Stringable
@@ -13,6 +14,11 @@ interface MessageInterface extends FlaggableInterface, Stringable
      * Get the message's identifier.
      */
     public function uid(): int;
+
+    /**
+     * Get the message's size in bytes (RFC822.SIZE).
+     */
+    public function size(): ?int;
 
     /**
      * Get the message date and time.
@@ -45,9 +51,11 @@ interface MessageInterface extends FlaggableInterface, Stringable
     public function replyTo(): ?Address;
 
     /**
-     * Get the 'In-Reply-To' address.
+     * Get the 'In-Reply-To' message identifier(s).
+     *
+     * @return string[]
      */
-    public function inReplyTo(): ?Address;
+    public function inReplyTo(): array;
 
     /**
      * Get the 'To' addresses.
@@ -117,7 +125,7 @@ interface MessageInterface extends FlaggableInterface, Stringable
     /**
      * Parse the message into a MailMimeMessage instance.
      */
-    public function parse(): MailMimeMessage;
+    public function parse(): IMessage;
 
     /**
      * Determine if the message is the same as another message.
