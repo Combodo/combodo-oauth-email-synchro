@@ -226,7 +226,7 @@
           <type>Overload-DBObject</type>
           <code><![CDATA[	public function GetEmailSource()
 	{
-		  $oSource = new Combodo\iTop\Extension\Service\IMAPOAuthEmailSource($this);
+		  $oSource = new Combodo\iTop\Extension\OAuthEmailSynchro\Service\IMAPOAuthEmailSource($this);
 		  return $oSource;
 	}]]></code>
         </method>

@@ -1,27 +1,10 @@
 <?php
 
-namespace Combodo\iTop\Extension\Service;
+namespace Combodo\iTop\Extension\OAuthEmailSynchro\Service;
 
-use DirectoryTree\ImapEngine\Connection\Loggers\LoggerInterface;
-use IssueLog;
+use Combodo\iTop\Extension\EmailSynchro\Service\IMAPEmailLogger;
 
-class IMAPOAuthEmailLogger implements LoggerInterface
+class IMAPOAuthEmailLogger extends IMAPEmailLogger
 {
-	const LOG_CHANNEL = 'OAuth';
-
-	/**
-	 * Log when a message is sent.
-	 */
-	public function sent(string $message): void
-	{
-		IssueLog::Debug("IMAP Sent: $message", static::LOG_CHANNEL);
-	}
-
-	/**
-	 * Log when a message is received.
-	 */
-	public function received(string $message): void
-	{
-		IssueLog::Debug("IMAP Received: $message", static::LOG_CHANNEL);
-	}
+	public const LOG_CHANNEL = 'OAuth';
 }
